@@ -16,6 +16,18 @@ $py = ".venv\Scripts\python.exe"
 if (-not (Test-Path $py)) { $py = "python" }
 
 & $py -m pip install -q "openai>=1.50" "anthropic>=0.40" "opencv-python-headless>=4.10" "pillow>=10.4"
+if (-not (Test-Path -LiteralPath $Sponsors)) {
+    $draft = "data\sponsors.draft.csv"
+    if (-not (Test-Path -LiteralPath $draft) -or (Import-Csv $draft).Count -eq 0) {
+        & $py -m vision.identify discover --video $Video --fps 0.2 --max-usd 0.3
+    }
+    # unreviewed: names the model read on at least 2 sampled frames
+    New-Item -ItemType Directory -Force (Split-Path $Sponsors) | Out-Null
+    Import-Csv $draft | Where-Object { [int]$_.frames_seen -ge 2 } |
+        Select-Object brand_id, name, aliases | Export-Csv $Sponsors -NoTypeInformation -Encoding UTF8
+    Write-Host "Sponsor list built from $draft (UNREVIEWED, seen on >= 2 frames):"
+    Get-Content $Sponsors
+}
 foreach ($f in @($Video, $Sponsors, ".env")) {
     if (-not (Test-Path -LiteralPath $f)) { Write-Error "missing file: $f" }
 }

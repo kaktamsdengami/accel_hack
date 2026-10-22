@@ -267,3 +267,9 @@ def test_wrong_key_stops_instead_of_looping():
     idf = ident(FakeOpenAI([AuthenticationError("401 Incorrect API key")]))
     with pytest.raises(AuthenticationError):
         idf.find(jpeg(), SPONSORS)
+
+
+def test_sponsors_csv_with_bom(tmp_path):
+    p = tmp_path / "s.csv"
+    p.write_bytes('\ufeff"brand_id","name","aliases"\n"b-alpha","Alpha Air",""\n'.encode())
+    assert vi.load_sponsors(p) == [Brand("b-alpha", "Alpha Air", ())]
