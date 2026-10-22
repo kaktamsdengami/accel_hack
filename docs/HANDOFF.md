@@ -17,6 +17,16 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22: T10 part 1, pure aggregation logic (Claude Opus 5.5)
+- Done: `workers/aggregate_logic.py` (intervals, brand/surface stats, pace, LED timeline, coverage
+  ledger/summary) + `tests/test_intervals.py`. No DB, no Valkey, db/ untouched.
+- Left for part 2 (after T05): write intervals/ledger to ClickHouse, Valkey live counters, wiring in
+  `workers/aggregate.py`.
+- Choices: `contracts` = dict brand_id -> target seconds per match; gap tolerance = 1 sample
+  (kwarg); `BrandStats.seconds` includes replays (pacing excludes them); shirt label from
+  `board_id="home:chest"`.
+- Branch: t10-intervals-logic.
+
 ### 2026-10-22: T01 contracts (Claude Code)
 - Done: docs/CONTRACTS.md, app/contracts.py, docs/api-mock.json (invented mock numbers), tests.
 - Decision: no images on Kafka (free plan throughput); evidence JPEGs in Postgres `evidence`.
