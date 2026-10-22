@@ -29,12 +29,20 @@ Update this file before you stop working. Newest entry on top. Keep it short and
   it locally while Lovable works on it). Its `src/data/api-mock.json` is identical to `docs/api-mock.json`; every path
   in its `src/api.ts` exists in our API. Blocker for live mode: `Dashboard.tsx` hardcodes `MATCH_ID = "m-demo-1"`,
   the deployed API serves `m-synthetic` -> it must take the match from `GET /matches`. Live switch prompt for
-  Lovable is in the T13 issue/HANDOFF log below. The cloud session cannot reach `*.aiven.app` (proxy 403), so the
+  Lovable: see the log entry "Lovable live switch". The cloud session cannot reach `*.aiven.app` (proxy 403), so the
   deployed URL was not re-checked from there.
 - Human: Modal billing; confirm sponsor draft; optional 10-frame spot check of the reference labels.
 - Local setup: `.venv` with `pip install -e ".[dev,vision,llm,gpu]"`; Wi-Fi drops PyPI downloads, retry per package.
 
 ## Log
+
+### 2026-10-22: Lovable live switch (cloud session, merges of #40/#42)
+- Prompt for Lovable (after the Runtime app is redeployed from main, or now, it serves the same code):
+  "Set VITE_API_BASE to https://01a16333-2589-7299-babc-33f2830bf66a-8000.eur-1.aiven.app and turn mock mode off.
+  Do not hardcode MATCH_ID: load GET /matches and use the first match (or a picker). If match.title contains
+  SYNTHETIC, show a SYNTHETIC badge instead of LIVE/RECORDED. Keep the MOCK DATA badge for mock mode."
+- The numbers on the current Lovable screen (38 % Claude share, $0.41 of $3.00, ...) are MOCK values from
+  docs/api-mock.json: never quote them as results.
 
 ### 2026-10-22: T06 live ingest worker (Claude Opus 5.5)
 - Done: `vision/preprocess.py` (HSV-histogram shot cuts, overlay mask = configured rects + static regions learned across shots, pHash dedup groups, `is_replay` hook = False), `workers/ingest.py` (`python -m workers ingest --video V --match-id M [--speed 1] [--source RECORDED] [--overlay x,y,w,h] [--dry-run]`), `scripts/make_test_video.py` (generated test match, no real footage). Publishes `Frame` to Kafka `frames`; representative frames: <=640 px JPEG in Postgres `evidence`, masked full-res JPEG in `data/frames/<match_id>/<frame_no>.jpg` (ignored by version control) for the readers. Registers the Match in Valkey like fake_stream.
