@@ -52,11 +52,11 @@ Screen: RECORDED badge and match clock, then the KPI tiles, the sponsor leaderbo
 track and the surface breakdown; slow scroll. [C1, C3 freshness]
 > This is EXPOSURE, built for a club's commercial manager. Here it runs on a recorded Champions League
 > segment. Second by second, it measures which sponsor is on screen, on which surface, and for how long.
-> The leaderboard, the LED rotation and the surface breakdown update live while the match streams.
+> On a live match the leaderboard, the LED rotation and the surface breakdown update as the broadcast streams.
 
 **0:37-0:57 | Proof** (broadcast evidence + coverage bar)
 Screen: zoom on the evidence frame with its time and confidence, then the coverage bar
-"100 % measured · 0.0 s unmeasured". [C3 grounding, C4]
+"100 % measured · 0.0 s unmeasured", then the FedEx sponsor report (/report/b-fedex). [C3 grounding, C4]
 > Every second is backed by a frame. This is the exact frame the agent read, with its confidence.
 > The coverage bar shows what we measured and what we did not: here one hundred percent of the
 > segment is measured, and nothing unmeasured is ever counted.
@@ -74,25 +74,26 @@ cost, latency per row), then the cost meter. [C2]
 Screen: type "Which sponsor got the most screen time, and where?", show the tool calls, the answer and
 its citation chips; click a chip to jump to the timeline. Record only a live answer. [C2 multi-step, C3]
 > The third agent is the Sponsor Analyst. I ask: which sponsor got the most screen time, and where?
-> It decides which tools it needs and calls our data API: the match report, the brand's intervals,
-> the evidence frames. The answer: FedEx, twenty seconds, on the far LED perimeter, with the frames
-> as citations. No number without a source.
+> It decides which tools it needs and calls our data API: first the match report, then the brand's
+> intervals. The answer: FedEx, twenty seconds, on the far-side LED perimeter, between second thirty-two
+> and fifty-two. Every number comes from a measurement, never from the model's imagination.
 
 **2:02-2:25 | Data at the core** (architecture diagram)
-Screen: architecture diagram from the README (Kafka → ClickHouse → Valkey → PostgreSQL → API on Aiven Runtime). [C3]
+Screen: the dashboard's DATA LAYER strip and the landing page's BUILT ON AIVEN section. [C3]
 > Underneath is a live data layer on Aiven. Frames and agent decisions stream through Kafka.
 > ClickHouse turns them into per-second intervals and a coverage ledger. Valkey keeps the live
 > counters this dashboard reads, and PostgreSQL stores every evidence frame.
 
 **2:25-2:45 | Evidence** (back to Live match: KPI tiles + leaderboard)
-Screen: the cost tile and the leaderboard; caption "measured run, recorded segment". [C4]
+Screen: Budget Guard card ($0.114 of $3.000, $0.118 per match-minute, projected 90 minutes) and an
+overlay with the run record numbers (the FRAMES ANALYSED tile counts only the last 50 decisions). [C4]
 > The measured result on this fifty-eight-second segment: a hundred and sixteen frames read, eighty-one
 > sponsor sightings, zero failed calls, zero brands outside the list. Eleven cents in total, about
 > twelve cents per match-minute, so a full match projects to around eleven dollars.
 
 **2:45-3:00 | Close** (the slide)
 Screen: the Google Slide. [C5]
-> EXPOSURE: every second of sponsor exposure, measured live, with proof. Our first users are club
+> EXPOSURE: every second of sponsor exposure, measured, priced and proven. Our first users are club
 > commercial teams preparing sponsor renewals. Next: logo memory, so every new match at the same
 > stadium gets cheaper.
 
