@@ -11,19 +11,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from app.labels import surface_label
+
 if TYPE_CHECKING:  # avoid a runtime import cycle with eval.gold
     from eval.gold import Gold
 
 Span = tuple[float, float]
 
-SURFACE_NAMES = {
-    "led_perimeter": "LED perimeter",
-    "static_board": "Board",
-    "shirt": "Shirt",
-    "banner": "Banner",
-    "backdrop": "Backdrop",
-    "other": "Other",
-}
 
 
 def norm_label(label: str | None) -> str:
@@ -86,9 +80,10 @@ def pred_label(item: dict) -> str:
     st = item.get("surface_type")
     if not st:
         return ""
-    name = SURFACE_NAMES.get(str(st), str(st))
-    side = item.get("side")
-    return f"{name} · {side}" if side and side != "unknown" else name
+    try:
+        return surface_label(st, item.get("side"), item.get("board_id"))
+    except ValueError:  # not a contracts enum value: keep the raw string rather than fail the eval
+        return str(st)
 
 
 def load_pred(path: str | Path) -> list[Pred]:

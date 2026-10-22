@@ -10,7 +10,10 @@ from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence
 
 from app.contracts import (
+    Alert,
+    AlertKind,
     BrandStats,
+    CostSummary,
     CoverageSecond,
     CoverageStatus,
     CoverageSummary,
@@ -18,16 +21,20 @@ from app.contracts import (
     Detection,
     Interval,
     LedSlot,
+    Match,
+    MatchReport,
     PaceStatus,
+    Reader,
     Shot,
-    Side,
     SurfaceStats,
     SurfaceType,
     UnmeasuredReason,
 )
+from app.labels import surface_label  # re-exported: the label logic lives in app/labels.py
 
 PACE_AHEAD = 1.1   # projected >= 1.1 * target
 PACE_BEHIND = 0.9  # projected < 0.9 * target
+PACE_ALERT_MIN_FRACTION = 0.1  # no under_pace alert before 10% of the match has been played
 EPS = 1e-6
 
 Span = tuple[float, float]
@@ -193,32 +200,6 @@ def brand_stats(
 
 # --- 3. per-surface stats --------------------------------------------------------
 
-def surface_label(surface_type: SurfaceType | str, side: Side | str = Side.unknown,
-                  board_id: str | None = None) -> str:
-    """Human label: "LED perimeter · far", "Board A · near", "Home shirt · chest".
-
-    Shirts and backdrops carry no side. For a shirt, board_id may be "home:chest" -> "Home shirt · chest";
-    any other board_id gives "Shirt · <board_id>".
-    """
-    st = SurfaceType(surface_type)
-    sd = Side(side)
-    side_part = "" if sd == Side.unknown else f" · {sd.value}"
-    if st == SurfaceType.led_perimeter:
-        return f"LED perimeter{side_part}"
-    if st == SurfaceType.static_board:
-        return (f"Board {board_id}" if board_id else "Board") + side_part
-    if st == SurfaceType.shirt:
-        if board_id and ":" in board_id:
-            kit, place = board_id.split(":", 1)
-            return f"{kit.capitalize()} shirt · {place}"
-        return f"Shirt · {board_id}" if board_id else "Shirt"
-    if st == SurfaceType.backdrop:
-        return "Backdrop"
-    if st == SurfaceType.banner:
-        return "Banner" + side_part
-    return "Other" + side_part
-
-
 def surface_stats(
     intervals: Sequence[Interval],
     match_duration_s: float,
@@ -328,3 +309,129 @@ def coverage_summary(ledger: Sequence[CoverageSecond]) -> CoverageSummary:
         unmeasured_seconds=float(total - measured),
         by_reason=dict(by_reason),
     )
+
+
+# --- 6. shots, unmeasured events, contracts, cost (inputs of the live report) ----------
+
+def derive_shots(detections: Iterable[Detection], sampled_fps: float) -> list[Shot]:
+    """Shots are not on Kafka, so rebuild them from detections: a shot spans its first to last sample.
+
+    Camera/replay are unknown here (camera="main", is_replay=False). When the router publishes shot
+    metadata, pass real `Shot` rows to `build_report(shots=...)` instead.
+    """
+    span: dict[tuple[str, str], list[float]] = {}
+    for d in detections:
+        s = span.setdefault((d.match_id, d.shot_id), [d.t, d.t])
+        s[0], s[1] = min(s[0], d.t), max(s[1], d.t)
+    step = 1.0 / sampled_fps
+    return [Shot(shot_id=sid, match_id=mid, t_start=a, t_end=b + step, camera="main")
+            for (mid, sid), (a, b) in span.items()]
+
+
+def unmeasured_events(decisions: Iterable[DecisionLog]) -> list[tuple[float, UnmeasuredReason]]:
+    """A decision with confidence 0 is a failed read. Its reason string names the cause when it starts
+    with an UnmeasuredReason value ("budget_cap", "reader_error: timeout"); otherwise low_confidence."""
+    out: list[tuple[float, UnmeasuredReason]] = []
+    for d in sorted(decisions, key=lambda x: x.t):
+        if d.confidence > 0:
+            continue
+        reason = next((r for r in UnmeasuredReason if d.reason.startswith(r.value)),
+                      UnmeasuredReason.low_confidence)
+        out.append((d.t, reason))
+    return out
+
+
+def contract_targets(rows: Iterable[tuple[str, str | None, float]]) -> dict[str, float]:
+    """Postgres `contracts` rows (brand_id, surface_type, target_seconds) -> brand_id -> target seconds.
+
+    A row with surface_type NULL is the brand-level target and wins; otherwise the surface rows are summed.
+    """
+    brand_level: dict[str, float] = {}
+    surface_level: dict[str, float] = defaultdict(float)
+    for brand_id, surface_type, seconds in rows:
+        if surface_type is None:
+            brand_level[brand_id] = float(seconds)
+        else:
+            surface_level[brand_id] += float(seconds)
+    return {**surface_level, **brand_level}
+
+
+def cost_summary(decisions: Sequence[DecisionLog], clock_t: float, budget_usd: float) -> CostSummary:
+    """Spend from decision logs. Reader counts and Claude share use the last decision per group_id
+    (same definition as eval.metrics.claude_call_share)."""
+    total = round(sum(d.cost_usd for d in decisions), 6)
+    final: dict[str, DecisionLog] = {}
+    for d in sorted(decisions, key=lambda x: (x.t, x.decision_id)):
+        final[d.group_id] = d
+    calls: dict[Reader, int] = defaultdict(int)
+    for d in final.values():
+        calls[Reader(d.chosen_reader)] += 1
+    claude = calls.get(Reader.claude, 0)
+    latest = max(decisions, key=lambda x: (x.t, x.decision_id), default=None)
+    left = latest.budget_left_usd if latest is not None else budget_usd
+    minutes = clock_t / 60.0
+    return CostSummary(
+        usd_total=total,
+        usd_per_match_minute=round(total / minutes, 6) if minutes > 0 else 0.0,
+        claude_call_share=round(claude / len(final), 3) if final else 0.0,
+        calls_by_reader=dict(calls),
+        budget_usd=budget_usd,
+        budget_left_usd=left,
+    )
+
+
+# --- 7. the full live report -------------------------------------------------------
+
+def build_report(
+    match: Match,
+    detections: Sequence[Detection],
+    decisions: Sequence[DecisionLog],
+    frames_t: Iterable[float],
+    settings,
+    contracts: Mapping[str, float] | None = None,
+    brand_names: Mapping[str, str] | None = None,
+    shots: Sequence[Shot] | None = None,
+) -> tuple[MatchReport, list[Interval], list[CoverageSecond]]:
+    """Everything the live path needs from the data seen so far, as pure maths.
+
+    - clock_t = end of the latest sample seen (detections, decisions, frames).
+    - Percentages use match.duration_s, or the elapsed clock while the duration is unknown.
+    - Coverage covers the elapsed seconds [0, ceil(clock_t)), not the unplayed rest of the match.
+    - Pace and under_pace alerts need a known duration; without it brands carry no_target.
+    - `settings` needs closeup_area_pct and match_budget_usd.
+    Returns (report, intervals, coverage ledger) so the worker can store all three.
+    """
+    fps = match.sampled_fps
+    step = 1.0 / fps
+    times = [d.t for d in detections] + [d.t for d in decisions] + list(frames_t)
+    frame_ts = list(times)
+    clock_t = round(max(times) + step, 3) if times else 0.0
+    duration = match.duration_s or clock_t
+    shots = list(shots) if shots is not None else derive_shots(detections, fps)
+    names = brand_names or {}
+    targets = contracts if (match.duration_s and contracts) else None
+
+    intervals = detections_to_intervals(detections, shots, fps, settings)
+    brands = brand_stats(intervals, duration, targets, clock_t, names)
+    surfaces = surface_stats(intervals, duration, names)
+    ledger = coverage_ledger(match.match_id, clock_t, frame_ts, decisions, unmeasured_events(decisions))
+    cost = cost_summary(decisions, clock_t, settings.match_budget_usd)
+
+    alerts: list[Alert] = []
+    if match.duration_s and clock_t >= PACE_ALERT_MIN_FRACTION * match.duration_s:
+        for b in brands:
+            if b.pace == PaceStatus.behind:
+                alerts.append(Alert(
+                    alert_id=f"a-{match.match_id}-under_pace-{b.brand_id}", match_id=match.match_id,
+                    t=clock_t, kind=AlertKind.under_pace, brand_id=b.brand_id,
+                    message=(f"{b.brand_name} is behind pace: projected {b.projected_seconds:.0f}s "
+                             f"vs target {b.target_seconds:.0f}s")))
+    if decisions and cost.budget_left_usd <= 0:
+        alerts.append(Alert(alert_id=f"a-{match.match_id}-budget", match_id=match.match_id, t=clock_t,
+                            kind=AlertKind.budget, message="Model budget for this match is used up"))
+
+    report = MatchReport(
+        match=match, clock_t=clock_t, brands=brands, surfaces=surfaces,
+        led_timeline=led_timeline(intervals, names), coverage=coverage_summary(ledger),
+        cost=cost, alerts=alerts)
+    return report, intervals, ledger
