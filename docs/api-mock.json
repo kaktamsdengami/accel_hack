@@ -1,0 +1,89 @@
+{
+  "_note": "MOCK DATA for building the dashboard (T13). Invented numbers and brand names, not measurements. Shapes follow docs/CONTRACTS.md v1.",
+  "GET /health": {"status": "ok", "contracts": "1.0"},
+  "GET /matches": [
+    {
+      "match_id": "m-demo-1",
+      "club_id": "c-demo",
+      "stadium_id": "s-demo",
+      "title": "Demo FC vs Rivals FC (segment 1)",
+      "source": "RECORDED",
+      "duration_s": 300,
+      "sampled_fps": 2,
+      "started_at": "2026-10-22T13:00:00Z"
+    }
+  ],
+  "GET /matches/m-demo-1/report": {
+    "match": {
+      "match_id": "m-demo-1",
+      "club_id": "c-demo",
+      "stadium_id": "s-demo",
+      "title": "Demo FC vs Rivals FC (segment 1)",
+      "source": "RECORDED",
+      "duration_s": 300,
+      "sampled_fps": 2,
+      "started_at": "2026-10-22T13:00:00Z"
+    },
+    "clock_t": 182.5,
+    "brands": [
+      {"brand_id": "b-alpha", "brand_name": "Alpha Air", "seconds": 61.5, "pct_of_match": 33.7, "closeup_seconds": 6.0, "replay_seconds": 4.5, "avg_area_pct": 2.3, "surfaces": 2, "target_seconds": 90, "projected_seconds": 101.1, "pace": "ahead"},
+      {"brand_id": "b-bravo", "brand_name": "Bravo Beer", "seconds": 38.0, "pct_of_match": 20.8, "closeup_seconds": 2.5, "replay_seconds": 0, "avg_area_pct": 1.6, "surfaces": 1, "target_seconds": 90, "projected_seconds": 62.5, "pace": "behind"},
+      {"brand_id": "b-charlie", "brand_name": "Charlie Bank", "seconds": 112.0, "pct_of_match": 61.4, "closeup_seconds": 40.5, "replay_seconds": 8.0, "avg_area_pct": 0.9, "surfaces": 1, "target_seconds": null, "projected_seconds": null, "pace": "no_target"},
+      {"brand_id": "b-delta", "brand_name": "Delta Energy", "seconds": 12.5, "pct_of_match": 6.8, "closeup_seconds": 12.5, "replay_seconds": 0, "avg_area_pct": 6.1, "surfaces": 1, "target_seconds": 20, "projected_seconds": 20.5, "pace": "on_track"}
+    ],
+    "surfaces": [
+      {"surface_label": "LED perimeter · far", "surface_type": "led_perimeter", "side": "far", "board_id": null, "brand_id": "b-alpha", "brand_name": "Alpha Air", "seconds": 55.0, "pct_of_match": 30.1, "avg_area_pct": 2.1, "closeup_seconds": 3.0},
+      {"surface_label": "LED perimeter · far", "surface_type": "led_perimeter", "side": "far", "board_id": null, "brand_id": "b-bravo", "brand_name": "Bravo Beer", "seconds": 38.0, "pct_of_match": 20.8, "avg_area_pct": 1.6, "closeup_seconds": 2.5},
+      {"surface_label": "Board A · near", "surface_type": "static_board", "side": "near", "board_id": "A", "brand_id": "b-alpha", "brand_name": "Alpha Air", "seconds": 9.0, "pct_of_match": 4.9, "avg_area_pct": 3.4, "closeup_seconds": 3.0},
+      {"surface_label": "Home shirt · chest", "surface_type": "shirt", "side": "unknown", "board_id": null, "brand_id": "b-charlie", "brand_name": "Charlie Bank", "seconds": 112.0, "pct_of_match": 61.4, "avg_area_pct": 0.9, "closeup_seconds": 40.5},
+      {"surface_label": "Interview backdrop", "surface_type": "backdrop", "side": "unknown", "board_id": null, "brand_id": "b-delta", "brand_name": "Delta Energy", "seconds": 12.5, "pct_of_match": 6.8, "avg_area_pct": 6.1, "closeup_seconds": 12.5}
+    ],
+    "led_timeline": [
+      {"surface_label": "LED perimeter · far", "brand_id": "b-alpha", "brand_name": "Alpha Air", "t_start": 0, "t_end": 30},
+      {"surface_label": "LED perimeter · far", "brand_id": "b-bravo", "brand_name": "Bravo Beer", "t_start": 30, "t_end": 60},
+      {"surface_label": "LED perimeter · far", "brand_id": "b-alpha", "brand_name": "Alpha Air", "t_start": 60, "t_end": 90},
+      {"surface_label": "LED perimeter · far", "brand_id": "b-bravo", "brand_name": "Bravo Beer", "t_start": 90, "t_end": 120},
+      {"surface_label": "LED perimeter · far", "brand_id": "b-alpha", "brand_name": "Alpha Air", "t_start": 120, "t_end": 150},
+      {"surface_label": "LED perimeter · far", "brand_id": "b-bravo", "brand_name": "Bravo Beer", "t_start": 150, "t_end": 180}
+    ],
+    "coverage": {"measured_pct": 94.2, "measured_seconds": 172.0, "unmeasured_seconds": 10.5, "by_reason": {"low_confidence": 6.0, "no_frame": 3.0, "budget_cap": 1.5}},
+    "cost": {"usd_total": 0.41, "usd_per_match_minute": 0.135, "claude_call_share": 0.38, "calls_by_reader": {"memory": 52, "claude": 32, "gpt": 3}, "budget_usd": 3.0, "budget_left_usd": 2.59},
+    "alerts": [
+      {"alert_id": "a-1", "match_id": "m-demo-1", "t": 175.0, "kind": "under_pace", "message": "Bravo Beer is projected at 62 s against a 90 s target.", "brand_id": "b-bravo"},
+      {"alert_id": "a-2", "match_id": "m-demo-1", "t": 141.5, "kind": "conflict", "message": "Memory and Claude disagree on Board A at 141 s; sent to the detective.", "brand_id": "b-alpha"}
+    ]
+  },
+  "GET /matches/m-demo-1/decisions?limit=3": [
+    {"decision_id": "d-87", "match_id": "m-demo-1", "shot_id": "m-demo-1:s41", "group_id": "m-demo-1:g112", "t": 181.0, "readers_tried": ["memory"], "chosen_reader": "memory", "confidence": 0.93, "cost_usd": 0.0002, "latency_ms": 140, "reason": "Close match to 14 stored Alpha Air crops from this stadium (margin 0.21).", "budget_left_usd": 2.59},
+    {"decision_id": "d-86", "match_id": "m-demo-1", "shot_id": "m-demo-1:s40", "group_id": "m-demo-1:g111", "t": 176.5, "readers_tried": ["memory", "claude"], "chosen_reader": "claude", "confidence": 0.88, "cost_usd": 0.011, "latency_ms": 2300, "reason": "Memory unsure: top two brands within margin 0.03; escalated to Claude.", "budget_left_usd": 2.59},
+    {"decision_id": "d-85", "match_id": "m-demo-1", "shot_id": "m-demo-1:s39", "group_id": "m-demo-1:g110", "t": 170.0, "readers_tried": ["memory", "claude", "gpt"], "chosen_reader": "gpt", "confidence": 0.71, "cost_usd": 0.019, "latency_ms": 4100, "reason": "Claude and memory conflict on Board A; second opinion agrees with memory.", "budget_left_usd": 2.6}
+  ],
+  "GET /matches/m-demo-1/brands/b-bravo": {
+    "brand": {"brand_id": "b-bravo", "brand_name": "Bravo Beer", "seconds": 38.0, "pct_of_match": 20.8, "closeup_seconds": 2.5, "replay_seconds": 0, "avg_area_pct": 1.6, "surfaces": 1, "target_seconds": 90, "projected_seconds": 62.5, "pace": "behind"},
+    "surfaces": [
+      {"surface_label": "LED perimeter · far", "surface_type": "led_perimeter", "side": "far", "board_id": null, "brand_id": "b-bravo", "brand_name": "Bravo Beer", "seconds": 38.0, "pct_of_match": 20.8, "avg_area_pct": 1.6, "closeup_seconds": 2.5}
+    ],
+    "intervals": [
+      {"match_id": "m-demo-1", "brand_id": "b-bravo", "surface_type": "led_perimeter", "side": "far", "board_id": null, "t_start": 31.0, "t_end": 49.5, "duration_s": 18.5, "avg_area_pct": 1.5, "max_area_pct": 2.0, "avg_center_dist": 0.41, "is_closeup": false, "is_replay": false},
+      {"match_id": "m-demo-1", "brand_id": "b-bravo", "surface_type": "led_perimeter", "side": "far", "board_id": null, "t_start": 92.0, "t_end": 111.5, "duration_s": 19.5, "avg_area_pct": 1.7, "max_area_pct": 3.2, "avg_center_dist": 0.37, "is_closeup": true, "is_replay": false}
+    ]
+  },
+  "GET /matches/m-demo-1/coverage": [
+    {"match_id": "m-demo-1", "second": 140, "status": "measured", "reason": null},
+    {"match_id": "m-demo-1", "second": 141, "status": "unmeasured", "reason": "low_confidence"},
+    {"match_id": "m-demo-1", "second": 142, "status": "measured", "reason": null}
+  ],
+  "SSE /matches/m-demo-1/stream (examples of each event)": [
+    {"event": "decision", "data": {"decision_id": "d-88", "match_id": "m-demo-1", "shot_id": "m-demo-1:s41", "group_id": "m-demo-1:g113", "t": 182.5, "readers_tried": ["memory"], "chosen_reader": "memory", "confidence": 0.95, "cost_usd": 0.0002, "latency_ms": 120, "reason": "Known LED slot for Alpha Air on this stadium.", "budget_left_usd": 2.59}},
+    {"event": "alert", "data": {"alert_id": "a-3", "match_id": "m-demo-1", "t": 182.5, "kind": "coverage_gap", "message": "4 s unmeasured around 141 s; detective re-reading.", "brand_id": null}}
+  ],
+  "POST /matches/m-demo-1/chat": {
+    "request": {"question": "How long was Bravo Beer visible in close-up?"},
+    "response": {
+      "answer": "Bravo Beer was in close-up for 2.5 s, all on the far LED perimeter, between 92 s and 111.5 s.",
+      "citations": [{"brand_id": "b-bravo", "surface_label": "LED perimeter · far", "t_start": 92.0, "t_end": 111.5, "frame_id": "m-demo-1:000204"}],
+      "sql": ["SELECT sum(duration_s) FROM intervals WHERE match_id = 'm-demo-1' AND brand_id = 'b-bravo' AND is_closeup"],
+      "not_measured_note": null
+    }
+  }
+}
