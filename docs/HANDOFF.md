@@ -26,6 +26,13 @@ Update this file before you stop working. Newest entry on top. Keep it short and
   Extra tables beyond the issue: ClickHouse `decisions`, Postgres `evidence`.
 - Checks: `python -m pytest -q` 9 passed; `-m live` 1 passed; `ruff check .` clean.
 
+### 2026-10-22: T20 part 1, metrics + harness (Claude Code)
+- Done: eval/metrics.py (CONTRACTS section 7), eval/gold.py (intervals or totals CSV), eval/harness.py
+  (run, `--compare`, `--reproduce`, optional `--chart`), eval/runs/README.md (formats), tests/test_metrics.py.
+- Checks: `ruff check .` clean, `python -m pytest -q` 16 passed. CLI demo on synthetic fixtures only; no record committed.
+- Branch: t20-eval-harness. Not done (part 2): baselines run, real records after T02 (gold, footage) and T14.
+- Notes: sponsor list defaults to brands in gold (`--sponsors` extends it). Mixed gold (some totals) uses the totals variant.
+
 ### 2026-10-22: T01 contracts (Claude Code)
 - Done: docs/CONTRACTS.md, app/contracts.py, docs/api-mock.json (invented mock numbers), tests.
 - Decision: no images on Kafka (free plan throughput); evidence JPEGs in Postgres `evidence`.
