@@ -301,10 +301,13 @@ def _match_hash(m: Match) -> dict[str, str]:
 # --- main loop ----------------------------------------------------------------------
 
 def run(stop: threading.Event | None = None, group: str = GROUP, match_filter: set[str] | None = None,
-        tick_s: float = TICK_S, auto_offset_reset: str = "earliest") -> None:
-    """Consume until `stop` is set (or forever). At-least-once: commit after ClickHouse accepts rows."""
+        tick_s: float = TICK_S, auto_offset_reset: str = "earliest", agg: Aggregator | None = None) -> None:
+    """Consume until `stop` is set (or forever). At-least-once: commit after ClickHouse accepts rows.
+
+    `agg` lets a caller in the same process (deploy/runtime.py) keep a handle on the state, e.g. to reset
+    one match before the SYNTHETIC demo replays it."""
     stop = stop or threading.Event()
-    agg = Aggregator(match_filter=match_filter)
+    agg = agg or Aggregator(match_filter=match_filter)
     consumer = stores.kafka_consumer(*TOPICS, group_id=group, auto_offset_reset=auto_offset_reset)
     log.info("aggregate worker started: group=%s topics=%s", group, ",".join(TOPICS))
     next_tick = time.monotonic() + tick_s
