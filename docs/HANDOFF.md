@@ -30,6 +30,19 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22 ~13:55: state for the next session (cloud session, Claude Opus 5.5)
+- LIVE DEMO WORKS: public dashboard https://pixel-perfect-recreation-849.lovable.app/dashboard?match=m-ucl-demo
+  (Lovable repo kaktamsdengami/screenshot-match; `?match=` pins the match and forces live mode). Data =
+  measured run on ucl.mp4 replayed into Aiven (record eval/runs/20261022T113439Z-ucl-vision-run.json).
+- Valkey was cleaned: only sp:match:m-ucl-demo and sp:match:m-synthetic remain (test matches removed).
+- Pitch: docs/PITCH.md (slide + 3-min voice-over around 3 agents: Vision Reader, Budget Guard, Sponsor
+  Analyst), docs/SUBMISSION.md (form texts; missing: Google Slide link, MP4).
+- Pending with the human: Lovable prompt "AGENTS AT WORK" strip + real Ask tab (Sponsor Analyst agent calling
+  our API as tools) + formatting fixes, then Publish; product name SponsorPulse vs EXPOSURE (Lovable renamed
+  the UI) not decided; video in Remotion from the live dashboard; Google Slide; submission form.
+- Rules agreed with the human: frontend/visual changes go to Lovable (no parallel edits in screenshot-match);
+  data/backend issues to the agent. Numbers only from eval/runs records.
+
 ### 2026-10-22 ~13:30: demo path on recorded UCL footage (cloud session, Claude Opus 5.5)
 - Human decision: the demo runs on data/videos/ucl.mp4 (good quality); video made in Remotion from the live
   dashboard. Note: "5min .mp4" is ALSO top-league footage (UCL final 2023 sponsors), not a club clip.
