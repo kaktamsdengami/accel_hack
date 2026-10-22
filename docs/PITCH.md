@@ -37,10 +37,12 @@ LED rotation timeline, coverage %, cost and budget left, the router's decision f
 Screenshot label: **SYNTHETIC DATA**.
 
 **Evidence (from `eval/runs/`, independent reference labelling, held-out window):**
-- Capture: `[[capture_pct from eval/runs/<record>]]`, MAE `[[mae_s from eval/runs/<record>]]` s/brand
-- Cost per match-minute: `[[cost_per_match_minute from eval/runs/<record>]]`
-- Vision-call share, match 1 -> 3 at equal accuracy: `[[claude_call_share from eval/runs/<records>]]`
-- Frame -> dashboard latency p50: `[[latency p50 from eval/runs/<record>]]`
+Measured on a recorded top-league broadcast segment (58 s, 116 frames at 2 fps, gpt-5-mini; record
+`eval/runs/20261022T113439Z-ucl-vision-run.json`):
+- Sponsor seconds on screen: FedEx 20.0 s, PlayStation 12.0 s, Heineken 6.5 s, Mastercard 1.0 s
+- 81 logo sightings, 0 failed calls, 0 answers off the sponsor list
+- Cost: $0.11 for the segment, about **$0.12 per match-minute** (~$11 for a 90-minute match at 2 fps)
+- Accuracy against reference labels: not measured yet (labelling unfinished)
 
 **Honest status.** Live on Aiven Runtime end to end with a SYNTHETIC match; router with budget guard
 working with stub readers; real vision and memory readers in progress; curator, detective and analyst
@@ -83,10 +85,11 @@ cleared or generated footage)
 > group the budget guard chose not to pay for.
 
 **2:10-2:40 | Evidence** (results table, values only from eval/runs)
-> We measured against an independent reference labelling of a held-out window. Capture was
-> [[capture_pct]], with an average error of [[mae_s]] seconds per brand, at [[cost_per_match_minute]]
-> per match-minute. And because memory grows, the share of vision calls went from [[share match 1]]
-> to [[share match 3]] at equal accuracy.
+> On a recorded Champions League broadcast segment, fifty-eight seconds and a hundred and sixteen
+> frames, the system found FedEx on screen for twenty seconds, PlayStation for twelve, Heineken for six
+> and a half, Mastercard for one. Zero failed calls, zero brands outside the sponsor list. It cost eleven
+> cents, about twelve cents per match-minute, so a full match is roughly the price of a sandwich.
+> Every one of those seconds links back to a frame.
 
 **2:40-3:00 | Close** (slide)
 > Clubs get proof they can put in front of a sponsor, live, per surface, with frames. Next: the

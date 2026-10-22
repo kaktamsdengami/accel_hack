@@ -153,23 +153,24 @@ spend limit; a group it cannot afford is recorded as unmeasured with reason `bud
 
 ## Results
 
-Every number here must come from a run record in `eval/runs/`. **No run record exists yet**, so all
-values are placeholders. The reference is an **independent reference labelling** of a held-out
-window (1 fps), not a hand count supplied by a club.
+Every number here comes from a run record in `eval/runs/`.
 
-| Metric (definitions: CONTRACTS section 7) | Router + memory | Vision only | Baseline |
-|---|---|---|---|
-| Capture % | `[[capture_pct from eval/runs/<record>]]` | `[[capture_pct from eval/runs/<record>]]` | `[[capture_pct from eval/runs/<record>]]` |
-| False-credit % | `[[false_credit_pct from eval/runs/<record>]]` | `[[...]]` | `[[...]]` |
-| MAE s/brand | `[[mae_s from eval/runs/<record>]]` | `[[...]]` | `[[...]]` |
-| Cost per match-minute (USD) | `[[cost_per_match_minute from eval/runs/<record>]]` | `[[...]]` | `[[...]]` |
-| Vision-call share | `[[claude_call_share from eval/runs/<record>]]` | `[[...]]` | n/a |
-| Frame -> dashboard latency p50 / p95 | `[[latency from eval/runs/<record>]]` | | |
+**Measured run** (`eval/runs/20261022T113439Z-ucl-vision-run.json`): a 58 s RECORDED top-league broadcast
+segment, whole-frame reading with gpt-5-mini at 2 fps, 12-brand sponsor list.
 
-Memory effect across matches (same stadium, equal accuracy): `[[vision-call share match 1 -> 3 from
-eval/runs/<records>]]`.
+| Brand | Seconds on screen |
+|---|---|
+| FedEx | 20.0 |
+| PlayStation | 12.0 |
+| Heineken | 6.5 |
+| Mastercard | 1.0 |
 
-Reproduce any row with `python -m eval.harness --reproduce eval/runs/<record>.json`.
+116 frames, 81 logo sightings, 7 visibility intervals, 0 failed calls, 0 answers off the sponsor list;
+208,916 input + 30,958 output tokens = **$0.114**, about **$0.12 per match-minute**.
+
+Not measured yet: accuracy against an independent reference labelling (capture %, false-credit %, MAE),
+the router + memory configuration, and frame-to-dashboard latency. The harness for those exists
+(`python -m eval.harness`, metrics in CONTRACTS section 7).
 
 ## Status (honest)
 
