@@ -37,8 +37,10 @@ import math
 import os
 import pathlib
 import re
+import threading
 import time
 from collections.abc import Callable, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
@@ -68,6 +70,7 @@ DEFAULT_MODEL = {"openai": "gpt-5-mini", "anthropic": "claude-opus-5-5"}
 READER_OF = {"openai": Reader.gpt, "anthropic": Reader.claude}
 SURFACES = [s.value for s in SurfaceType]
 SIDES = [s.value for s in Side]
+_LOG_LOCK = threading.Lock()
 # SDK errors that no retry fixes (same class names in openai and anthropic).
 FATAL_ERRORS = {"AuthenticationError", "PermissionDeniedError", "NotFoundError"}
 # Assumed tokens of one call, only to reserve budget before the real usage is known.
@@ -375,7 +378,7 @@ class Identifier:
             )
             data = r.data
         except Exception as e:  # noqa: BLE001  (reported, never guessed: caller marks the frame unmeasured)
-            if type(e).__name__ in FATAL_ERRORS:   # wrong key / no access / unknown model: stop, do not loop
+            if type(e).__name__ in FATAL_ERRORS:  # wrong key / no access / unknown model: stop, do not loop
                 raise
             call, data = Call(mode, self.model, 0, 0, 0.0, 0.0, error=f"{type(e).__name__}: {e}"[:300]), None
         self.calls.append(call)
@@ -398,7 +401,7 @@ class Identifier:
             return
         try:
             self.cost_log.parent.mkdir(parents=True, exist_ok=True)
-            with self.cost_log.open("a", encoding="utf-8") as f:
+            with _LOG_LOCK, self.cost_log.open("a", encoding="utf-8") as f:
                 f.write(
                     json.dumps({"ts": datetime.now(UTC).isoformat(), "context": context, **c.__dict__}) + "\n"
                 )
@@ -671,6 +674,7 @@ def run_video(
     out_dir: pathlib.Path,
     overlay: str = "",
     limit: int | None = None,
+    workers: int = 1,
 ) -> dict:
     """Whole-frame identification of a video -> out_dir/{detections,decisions,pred}.json + summary.json."""
     from app.config import settings
@@ -683,17 +687,34 @@ def run_video(
     shots: dict[str, list[float]] = {}
     stopped = None
     exp = ident.expected_cost_usd()
+
+    def flush(batch: list) -> None:
+        # one thread per frame of the batch; results are kept in frame order
+        with ThreadPoolExecutor(max_workers=max(len(batch), 1)) as pool:
+            res = list(pool.map(lambda b: ident.find(b[3], sponsors, context=f"{match_id}:{b[0]}"), batch))
+        for (k, t, shot_no, _), (found, call) in zip(batch, res, strict=True):
+            fid, sid = f"{match_id}:{k}", f"{match_id}:s{shot_no}"
+            shots.setdefault(sid, [t, t])[1] = t
+            dets.extend(found_to_detections(found, match_id, fid, sid, t, ident.reader, s.min_area_pct))
+            decs.append(
+                decision_for(match_id, fid, sid, t, ident.reader, call, found, max_usd - ident.spent_usd)
+            )
+
+    batch: list = []
     for k, t, shot_no, jpeg in sample_video(video, fps, overlay=overlay):
         if limit is not None and k >= limit:
             break
-        if ident.spent_usd + exp > max_usd:
-            stopped = f"budget_cap at t={t}s (spent ${ident.spent_usd:.4f} of ${max_usd})"
-            break
-        fid, sid = f"{match_id}:{k}", f"{match_id}:s{shot_no}"
-        shots.setdefault(sid, [t, t])[1] = t
-        found, call = ident.find(jpeg, sponsors, context=fid)
-        dets += found_to_detections(found, match_id, fid, sid, t, ident.reader, s.min_area_pct)
-        decs.append(decision_for(match_id, fid, sid, t, ident.reader, call, found, max_usd - ident.spent_usd))
+        if ident.spent_usd + exp * (len(batch) + 1) > max_usd:
+            flush(batch)
+            batch = []
+            if ident.spent_usd + exp > max_usd:
+                stopped = f"budget_cap at t={t}s (spent ${ident.spent_usd:.4f} of ${max_usd})"
+                break
+        batch.append((k, t, shot_no, jpeg))
+        if len(batch) >= workers:
+            flush(batch)
+            batch = []
+    flush(batch)
     step = 1.0 / fps
     shot_objs = [
         Shot(shot_id=sid, match_id=match_id, t_start=a, t_end=b + step, camera="main")
@@ -795,6 +816,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--fps", type=float, default=1.0)
     p.add_argument("--n", type=int, default=20, help="check: frames sampled evenly from --frames")
     p.add_argument("--limit", type=int, help="run: stop after N frames")
+    p.add_argument("--workers", type=int, default=8, help="run: parallel API calls")
     p.add_argument("--max-usd", type=float, default=1.0, help="hard spend cap for this command")
     p.add_argument("--overlay", default="", help="x,y,w,h[;...] normalised rects to mask (score bug)")
     p.add_argument("--provider")
@@ -811,7 +833,16 @@ def main(argv: list[str] | None = None) -> int:
             p.error("run needs --video and --sponsors")
         out = pathlib.Path(a.out or ROOT / "data" / "runs" / a.name)
         summary = run_video(
-            ident, a.video, load_sponsors(a.sponsors), a.match_id, a.fps, a.max_usd, out, a.overlay, a.limit
+            ident,
+            a.video,
+            load_sponsors(a.sponsors),
+            a.match_id,
+            a.fps,
+            a.max_usd,
+            out,
+            a.overlay,
+            a.limit,
+            a.workers,
         )
         print(json.dumps(summary, indent=1))
         print(

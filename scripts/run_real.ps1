@@ -20,7 +20,7 @@ foreach ($f in @($Video, $Sponsors, ".env")) {
     if (-not (Test-Path -LiteralPath $f)) { Write-Error "missing file: $f" }
 }
 
-& $py -m vision.identify run --video $Video --sponsors $Sponsors --fps $Fps --max-usd $MaxUsd --name $Name
+& $py -m vision.identify run --video $Video --sponsors $Sponsors --fps $Fps --max-usd $MaxUsd --name $Name --workers 8
 if ($LASTEXITCODE -ne 0) { Write-Error "vision run failed" }
 
 $out = "data\runs\$Name"
