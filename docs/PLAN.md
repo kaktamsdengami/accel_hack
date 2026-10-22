@@ -24,7 +24,10 @@ rewrite from scratch).
 | 2. Agent capability | Router decides per shot under a budget; curator resolves stale/conflicting memory; detective investigates gaps; analyst writes and checks SQL | T14–T17 |
 | 3. Data at the core | Live Kafka stream; per-second detections and surfaces in ClickHouse; logo memory in pgvector; live counters in Valkey. Without the data the agents are useless | T05, T06, T10, T15 |
 | 4. Evidence it works | Capture % and MAE vs the club's hand count; cost per match-minute; Claude-call share falling match 1→3 at equal accuracy; frame→dashboard latency; independent second model removes the "circular benchmark" issue from the pilot | T19–T21 |
-| 5. Execution & pitch | Live dashboard during the pitch, LIVE/RECORDED labels, one slide, deployed on Aiven Runtime | T12, T13, T23, T24 |
+| 5. Execution & pitch | 3-minute demo MP4 of one end-to-end journey; **one public Google Slide, the only thing shown on stage for top-8**; deployed on Aiven Runtime | T12, T13, T23, T29, T30 |
+
+Submission form (T30): project name, one-line pitch, 3-min demo MP4, "data layer in action" text,
+evidence upload, one pitch slide (public link) are required; GitHub repo and demo link optional.
 | Aiven prize | Kafka, ClickHouse, PostgreSQL+pgvector, Valkey each doing a real job, plus Runtime | T03, T05, T12 |
 
 Brief patterns covered: event-driven agent, analyst agent, agent with memory (stale/contradicting),
@@ -169,6 +172,7 @@ Effort is a rough estimate of active work, not a measurement. `needs:human` = a 
 - **T23** Pitch slide, README, diagram · core · submission · deps: T21 (numbers); start early
 - **T29** Demo video with motion graphics and ElevenLabs voice-over · core · submission · deps: T13 (screens), T21 (numbers); script early
 - **T24** Final verification and rehearsal · core · submission · deps: all core, incl. T29
+- **T30** Submission form, all fields · core · submission · deps: T21, T23, T29 · needs:human
 
 **Stretch**
 - **T25** Fine-tune own logo detector on Modal from accumulated labels

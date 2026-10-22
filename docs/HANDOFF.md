@@ -5,9 +5,9 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 ## Current state
 
 - Phase: **V0 setup.**
-- Done: T00, T01 (contracts, PR), T03 (Aiven up, PR #31). Issues T01–T29 on GitHub.
+- Done: T00, T01 (#32), T03 (#31), T04 (#33, CI green). Issues T01–T30 on GitHub (T30 = submission form).
 - In progress: none.
-- Next: T04 (skeleton + CI) → T05 (schemas). T13 can start in Lovable from `docs/api-mock.json`.
+- Next: T05 (schemas), T10 (intervals), T20 (eval harness) in parallel worktrees. T13 can start in Lovable from `docs/api-mock.json`.
   Human: T02 (footage, sponsor list, hand count, permission).
 - Blocked: T06/T07/T08 need footage from T02. T08 also needs the Anthropic API key (credits not
   arrived yet).
