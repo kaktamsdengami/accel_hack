@@ -22,10 +22,10 @@ FastAPI service on **Aiven Runtime** streams it over SSE to the Lovable dashboar
 frames. Today the deployed demo runs on a SYNTHETIC match; the real-footage run was recorded offline with
 the same contracts (see evidence).
 
-**Evidence it works (upload):** `data/runs/[[name]]/summary.json` (measured seconds per brand, frames,
-errors, tokens, cost) and the run record `eval/runs/[[record]].json` if reference labels exist. Measured on a
-5-minute RECORDED segment with `[[model]]`: `[[frames]]` frames, `[[cost_usd]]` USD
-(`[[cost per match-minute]]` per match-minute). Accuracy: `[[from eval/runs record, or "not measured yet"]]`.
+**Evidence it works (upload):** `eval/runs/20261022T113439Z-ucl-vision-run.json`, measured on a 58 s RECORDED top-league broadcast segment with
+gpt-5-mini at 2 fps: 116 frames, 81 logo sightings, 0 errors, 0 off-list answers; FedEx 20.0 s, PlayStation
+12.0 s, Heineken 6.5 s, Mastercard 1.0 s on screen; $0.114 total, about $0.12 per match-minute. Accuracy against
+reference labels: not measured yet.
 
 **One pitch slide (public link):** `[[Google Slides link, "Anyone with the link can view"]]`
 

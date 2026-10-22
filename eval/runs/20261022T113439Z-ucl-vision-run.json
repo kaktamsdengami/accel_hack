@@ -1,0 +1,26 @@
+{
+ "kind": "vision_run_summary",
+ "note": "Output of `python -m vision.identify run` (summary.json), copied verbatim from the run on the team PC. Measured exposure and cost only: no reference labels exist, so there is NO accuracy metric in this record.",
+ "command": "python -m vision.identify run --video data/videos/ucl.mp4 --sponsors data/gold/sponsors.reference.csv --fps 2 --max-usd 2 --name ucl --match-id m-ucl --limit 600",
+ "git_commit": "da026ff5844f740409f5807d7eeb04364ccd6066",
+ "source": "RECORDED",
+ "footage": "top-league broadcast segment (not in git, not for public use)",
+ "sponsor_list": "12 brands, cleaned by the team from `vision.identify discover` output",
+ "summary": {
+  "provider": "openai",
+  "model": "gpt-5-mini",
+  "fps": 2.0,
+  "frames": 116,
+  "minutes": 0.967,
+  "detections": 81,
+  "intervals": 7,
+  "errors": 0,
+  "off_list_dropped": 0,
+  "tokens_in": 208916,
+  "tokens_out": 30958,
+  "cost_usd": 0.114116,
+  "stopped": null,
+  "brand_seconds": {"b-fedex": 20.0, "b-heineken": 6.5, "b-mastercard": 1.0, "b-playstation": 12.0}
+ },
+ "derived": {"cost_usd_per_match_minute": 0.118}
+}
