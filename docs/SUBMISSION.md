@@ -33,4 +33,4 @@ reference labels: not measured yet.
 git-ignored)
 
 **Demo link:** https://01a16333-2589-7299-babc-33f2830bf66a-8000.eur-1.aiven.app (API) and
-`[[Lovable dashboard URL]]`
+https://pixel-perfect-recreation-849.lovable.app/dashboard?match=m-ucl-demo (dashboard)
