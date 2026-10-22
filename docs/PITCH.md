@@ -35,39 +35,66 @@ repo https://github.com/kaktamsdengami/accel_hack-
 
 ---
 
-## 3-minute demo video: voice-over script (~380 words)
+## 3-minute demo video: screen walkthrough + voice-over script
 
-**0:00-0:15 | Hook** (title card → the dashboard with the UCL frame)
-> Clubs sell their stadium to sponsors: LED boards, shirts, backdrops. When the contract comes up, the
-> sponsor asks one question: how many seconds was I really on TV? Nobody can answer it live.
+Screen recording of the live dashboard (`?match=m-ucl-demo`), voice-over from `scripts/voiceover.py`
+(voice Sarah). `Screen:` = what to show/click. `[C1..C5]` = judging criterion the scene proves:
+C1 problem & value, C2 agent capability, C3 data at the core, C4 evidence it works, C5 execution & pitch.
+Numbers: eval/runs/20261022T113439Z-ucl-vision-run.json only.
 
-**0:15-0:40 | The product** (dashboard, sponsor leaderboard growing)
-> EXPOSURE watches the broadcast and measures, second by second, which sponsor is visible, on
-> which surface, with the frame as proof. Here it is on a recorded Champions League segment.
+**0:00-0:15 | Hook** (title card, then cut to the dashboard)
+Screen: black title card "EXPOSURE", then the Live match tab with the broadcast frame. [C1]
+> A club sells its stadium to sponsors: LED boards, shirts, backdrops. At renewal, every sponsor
+> asks the same question: how many seconds was I really on TV? Today the answer is a manual count, or a guess.
 
-**0:40-1:20 | The agents** (zoom on "Agents at work", one card at a time)
-> Three agents do the work. The Vision Reader looks at every frame and decides which sponsor is on
-> which board, but only from the club's sponsor list: if it is not sure, it says unknown, it never
-> guesses. The Budget Guard prices every model call before it is made, against a hard budget per
-> match, so a full match stays cheap. And the Sponsor Analyst answers questions in plain English.
+**0:15-0:37 | Live match** (Live match tab)
+Screen: RECORDED badge and match clock, then the KPI tiles, the sponsor leaderboard, the LED rotation
+track and the surface breakdown; slow scroll. [C1, C3 freshness]
+> This is EXPOSURE, built for a club's commercial manager. Here it runs on a recorded Champions League
+> segment. Second by second, it measures which sponsor is on screen, on which surface, and for how long.
+> The leaderboard, the LED rotation and the surface breakdown update live while the match streams.
 
-**1:20-1:55 | Ask the analyst** (Ask tab: type "Which sponsor got the most screen time and where?")
-> I ask: which sponsor got the most screen time? The analyst calls our data API as tools, the report,
-> the brand intervals, the frames, and answers: FedEx, twenty seconds, on the LED perimeter, with the
-> frames to prove it. No number without a source.
+**0:37-0:57 | Proof** (broadcast evidence + coverage bar)
+Screen: zoom on the evidence frame with its time and confidence, then the coverage bar
+"100 % measured · 0.0 s unmeasured". [C3 grounding, C4]
+> Every second is backed by a frame. This is the exact frame the agent read, with its confidence.
+> The coverage bar shows what we measured and what we did not: here one hundred percent of the
+> segment is measured, and nothing unmeasured is ever counted.
 
-**1:55-2:25 | Data at the core** (architecture diagram from the README)
-> Under the hood it is a live data pipeline on Aiven. Frames and decisions stream through Kafka.
-> ClickHouse turns them into per-second intervals and a coverage ledger. Valkey keeps live counters
-> for the dashboard, PostgreSQL stores every evidence frame. The API runs on Aiven Runtime.
+**0:57-1:32 | Agents at work** (Agents tab)
+Screen: "Agents at work" strip with the three agent cards, then the decision log (model, confidence,
+cost, latency per row), then the cost meter. [C2]
+> Three agents work as a team. The Vision Reader looks at every frame and decides which sponsor is on
+> which board, choosing only from the club's sponsor list: if it is not sure, it says unknown. The
+> Budget Guard prices every model call before it is made, against a hard budget per match, and stops
+> the run before it overspends. Every decision lands in this log: which agent, which model, how
+> confident, what it cost, and how long it took.
 
-**2:25-2:45 | Evidence** (leaderboard + cost card)
-> On this fifty-eight-second segment: FedEx twenty seconds, PlayStation twelve, Heineken six and a
-> half, Mastercard one. Zero failed calls, zero brands outside the list. Eleven cents in total, about
-> twelve cents per match-minute.
+**1:32-2:02 | Ask the analyst** (Ask tab)
+Screen: type "Which sponsor got the most screen time, and where?", show the tool calls, the answer and
+its citation chips; click a chip to jump to the timeline. Record only a live answer. [C2 multi-step, C3]
+> The third agent is the Sponsor Analyst. I ask: which sponsor got the most screen time, and where?
+> It decides which tools it needs and calls our data API: the match report, the brand's intervals,
+> the evidence frames. The answer: FedEx, twenty seconds, on the far LED perimeter, with the frames
+> as citations. No number without a source.
 
-**2:45-3:00 | Close** (slide)
-> EXPOSURE: every second of sponsor exposure, measured live, with proof. Next: logo memory, so
-> every new match at the same stadium gets cheaper.
+**2:02-2:25 | Data at the core** (architecture diagram)
+Screen: architecture diagram from the README (Kafka → ClickHouse → Valkey → PostgreSQL → API on Aiven Runtime). [C3]
+> Underneath is a live data layer on Aiven. Frames and agent decisions stream through Kafka.
+> ClickHouse turns them into per-second intervals and a coverage ledger. Valkey keeps the live
+> counters this dashboard reads, and PostgreSQL stores every evidence frame.
+
+**2:25-2:45 | Evidence** (back to Live match: KPI tiles + leaderboard)
+Screen: the cost tile and the leaderboard; caption "measured run, recorded segment". [C4]
+> The measured result on this fifty-eight-second segment: a hundred and sixteen frames read, eighty-one
+> sponsor sightings, zero failed calls, zero brands outside the list. Eleven cents in total, about
+> twelve cents per match-minute, so a full match projects to around eleven dollars.
+
+**2:45-3:00 | Close** (the slide)
+Screen: the Google Slide. [C5]
+> EXPOSURE: every second of sponsor exposure, measured live, with proof. Our first users are club
+> commercial teams preparing sponsor renewals. Next: logo memory, so every new match at the same
+> stadium gets cheaper.
 
 Recording note: show only what the dashboard shows; the Analyst answer must come from the live app.
+If the Ask tab is not live at recording time, cut scene "Ask the analyst" and say so; never fake it.
