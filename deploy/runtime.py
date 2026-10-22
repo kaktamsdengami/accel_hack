@@ -14,7 +14,8 @@ them to a private temp dir from one of (first match wins, per file):
 and points KAFKA_CA_PATH / KAFKA_CERT_PATH / KAFKA_KEY_PATH at them. Runtime integration names are also
 mapped: DATABASE_URL -> PG_URI, VALKEY_URL -> VALKEY_URI, KAFKA_BOOTSTRAP_SERVERS -> KAFKA_BOOTSTRAP.
 
-Flags (env): PORT (8000), RUN_WORKER (1), AGG_GROUP (aggregate-runtime), DEMO_SYNTHETIC (0),
+Flags (env): PORT (8000), RUN_WORKER (1), AGG_GROUP (aggregate-local; deployed: aggregate-runtime),
+DEMO_SYNTHETIC (0),
 DEMO_MATCH_ID (m-synthetic), DEMO_DURATION_S (60), DEMO_SPEED (1), DEMO_PAUSE_S (10), DEMO_START_DELAY_S (15).
 The demo replays the invented match of scripts/fake_stream.py: never show it as a measurement.
 """
@@ -86,7 +87,7 @@ class Runner:
     def worker(self) -> None:
         from workers import aggregate
 
-        group = self.env.get("AGG_GROUP", "aggregate-runtime")
+        group = self.env.get("AGG_GROUP", "aggregate-local")
         backoff = 5.0
         while not self.stop.is_set():
             try:

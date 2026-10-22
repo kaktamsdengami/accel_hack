@@ -17,6 +17,19 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22: T12 part 1, deployed on Aiven Runtime with synthetic data (Claude Opus 5.5)
+- Done: live at https://01a16333-2589-7299-babc-33f2830bf66a-8000.eur-1.aiven.app (Runtime app `sponsorpulse`,
+  startup-10-256, google-europe-west4, $0.00959/h). `deploy/runtime.py` = one container: API + aggregation
+  worker thread + `DEMO_SYNTHETIC=1` loop of the INVENTED `m-synthetic` (60 s pass, 10 s pause, state reset).
+  `scripts/runtime_deploy.py` creates/updates the app via the Aiven API (public repo, so no GitHub app needed);
+  secrets from `.env`, Kafka PEMs as base64 env vars. `docs/DEPLOY.md` has env list, redeploy, checks.
+- Checks: deployed `/health` 200, `/matches` lists m-synthetic, report clock 8 -> 14 -> 20 s, SSE stats events.
+  `ruff check .` clean, `pytest -q` 103 passed.
+- Branch / PR: t12-runtime-deploy, PR #40. The app tracks branch t12-runtime-deploy: after merge run
+  `python scripts/runtime_deploy.py --branch main`.
+- Notes: `workers/aggregate.run` got an optional `agg=` argument (T10 file). Worker state is in memory, so
+  "restart does not lose data" is NOT met yet. Power the app off after the hackathon.
+
 ### 2026-10-22: T10 part 2, aggregation worker on Aiven (Claude Opus 5.5)
 - Done: `workers/aggregate.py` (`python -m workers aggregate`: Kafka detections/decisions/frames -> ClickHouse raw,
   intervals, coverage; Valkey snapshot `sp:<m>:stats`, pub/sub `sp:live:<m>`, decisions/alerts lists, match hash
