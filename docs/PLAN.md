@@ -111,6 +111,8 @@ model ~96%. So recognition is by **appearance**, not text.
 | Lovable 300 credits | dashboard, sponsor report page, landing page | T13, T22 |
 | Supabase $25 | club/sponsor login through Lovable's built-in integration; data stays on Aiven | T28 |
 | n8n Pro | under-pace alert and post-match report workflow (demo sends only to our own address) | T26 |
+| ElevenLabs | voice-over for the demo/pitch video | T29 |
+| Remotion (code-built video) | motion graphics for the demo/pitch video, rendered from React | T29 |
 | GitHub | issues, milestones, PRs, Actions CI, Runtime source | all |
 
 ### Development capacity (nobody codes by hand)
@@ -122,6 +124,9 @@ Order of use; switching is cheap because state lives in the repo (see section 8)
 3. **Codex CLI** on the OpenAI key (reads `AGENTS.md`). T19 then shrinks to the free minimum.
 4. **Lovable** for all of `web/` at any time; it does not consume Claude usage.
 5. The Anthropic API $100 is **not** used for development unless the team decides so explicitly.
+
+**Reserve:** keep enough development capacity for T29 (motion video + voice-over) at the end;
+do not spend the last of the usage ladder on stretch tasks.
 
 Saving usage: Sonnet for routine tasks (schemas, CRUD, scripts), Opus for router, interval maths
 and agent prompts; short messages; one task per session.
@@ -162,7 +167,8 @@ Effort is a rough estimate of active work, not a measurement. `needs:human` = a 
 - **T21** Final runs and frozen numbers · core · eval · deps: T20, T15, T12
 - **T22** Sponsor report export · second-layer · ui · deps: T10
 - **T23** Pitch slide, README, diagram · core · submission · deps: T21 (numbers); start early
-- **T24** Final verification and rehearsal · core · submission · deps: all core
+- **T29** Demo video with motion graphics and ElevenLabs voice-over · core · submission · deps: T13 (screens), T21 (numbers); script early
+- **T24** Final verification and rehearsal · core · submission · deps: all core, incl. T29
 
 **Stretch**
 - **T25** Fine-tune own logo detector on Modal from accumulated labels
@@ -178,6 +184,7 @@ T02 (human) ──────────────┤  T07 ─┼─► T12 
 T03 (human) ──────────────┘  T08 ─┤               │ T16, T17, T19 in parallel
                              T10 ─► T11 ┘          T09 (after T07) feeds T14
 T13 in Lovable from T01 (mock data) → live after T11; T18, T22 any time after T10
+T29 video: script with T23, screen captures after T13, final numbers after T21, before T24
 ```
 
 Parallel sessions (no shared files): after T05 → T06, T07, T08, T10 in four sessions + T13 in

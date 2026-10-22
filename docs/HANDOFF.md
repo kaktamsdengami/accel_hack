@@ -5,7 +5,7 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 ## Current state
 
 - Phase: **planning done, build not started.**
-- Done: T00 (handoff kit), plan in `docs/PLAN.md`, issues T01–T28 on GitHub.
+- Done: T00 (handoff kit), plan in `docs/PLAN.md`, issues T01–T29 on GitHub (T29 = demo video, reserve capacity for it).
 - In progress: none.
 - Next: T01 (contracts) → T04 → T05. Human: T02 (footage, sponsor list, hand count, permission)
   and T03 (create Aiven services, check Runtime access).
