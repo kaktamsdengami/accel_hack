@@ -17,6 +17,15 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22: T05 data layer schemas (Claude Code)
+- Done: `db/clickhouse/*.sql`, `db/postgres/*.sql`, `db/kafka_topics.py`, `db/valkey_keys.md`, `scripts/migrate.py`, tests.
+  `python -m scripts.migrate` ran twice on Aiven without error (Kafka topics created via kafka-python admin, 1 partition).
+- Notes: embedding dimension is the constant `EMBEDDING_DIM` in `scripts/migrate.py` (env override, default 768);
+  an existing `logo_memory` column is not altered, so decide SigLIP vs CLIP before data is stored (else drop the table).
+  ClickHouse tables are ReplacingMergeTree (dedupe on re-insert); views `brand_seconds` / `surface_seconds` are plain views using FINAL.
+  Extra tables beyond the issue: ClickHouse `decisions`, Postgres `evidence`.
+- Checks: `python -m pytest -q` 9 passed; `-m live` 1 passed; `ruff check .` clean.
+
 ### 2026-10-22: T20 part 1, metrics + harness (Claude Code)
 - Done: eval/metrics.py (CONTRACTS section 7), eval/gold.py (intervals or totals CSV), eval/harness.py
   (run, `--compare`, `--reproduce`, optional `--chart`), eval/runs/README.md (formats), tests/test_metrics.py.
