@@ -17,6 +17,16 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22: T10 part 1, pure aggregation logic (Claude Opus 5.5)
+- Done: `workers/aggregate_logic.py` (intervals, brand/surface stats, pace, LED timeline, coverage
+  ledger/summary) + `tests/test_intervals.py`. No DB, no Valkey, db/ untouched.
+- Left for part 2 (after T05): write intervals/ledger to ClickHouse, Valkey live counters, wiring in
+  `workers/aggregate.py`.
+- Choices: `contracts` = dict brand_id -> target seconds per match; gap tolerance = 1 sample
+  (kwarg); `BrandStats.seconds` includes replays (pacing excludes them); shirt label from
+  `board_id="home:chest"`.
+- Branch: t10-intervals-logic.
+
 ### 2026-10-22: T05 data layer schemas (Claude Code)
 - Done: `db/clickhouse/*.sql`, `db/postgres/*.sql`, `db/kafka_topics.py`, `db/valkey_keys.md`, `scripts/migrate.py`, tests.
   `python -m scripts.migrate` ran twice on Aiven without error (Kafka topics created via kafka-python admin, 1 partition).
