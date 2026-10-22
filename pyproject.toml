@@ -38,5 +38,6 @@ ignore = ["E731", "UP042", "UP007"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 markers = ["live: needs real Aiven/API credentials (run with -m live)"]
 addopts = "-m 'not live'"
