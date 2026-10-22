@@ -48,8 +48,7 @@ const PLAN: { criteria: string[]; keys: Key[]; title?: boolean; overlay?: "run" 
   ] },
   { criteria: ["C1", "C3"], keys: [
     { at: 0, shot: "dash", box: "header", caption: "Recorded UCL segment · 58 s" },
-    { at: 4, shot: "dash", box: "kpis", caption: "Seconds per sponsor, per surface" },
-    { at: 9, shot: "dash", box: "leaderboard", caption: "Sponsor leaderboard" },
+    { at: 5, shot: "dash", box: "leaderboard", caption: "Measured seconds per sponsor" },
     { at: 14, shot: "dash", box: "rotation", caption: "LED rotation: who was on the boards, and when" },
     { at: 18, shot: "dash", box: "surfaces", caption: "Surface breakdown" },
   ] },
@@ -63,6 +62,7 @@ const PLAN: { criteria: string[]; keys: Key[]; title?: boolean; overlay?: "run" 
     { at: 4, shot: "dash", box: "vision", caption: "Vision Reader · unknown stays unknown" },
     { at: 13, shot: "dash", box: "budget", caption: "Budget Guard · hard budget per match" },
     { at: 21, shot: "agents", box: "log", caption: "Every decision logged: model, confidence, cost, latency" },
+    { at: 27.5, shot: "agents", box: "logdown", caption: "Every decision logged: model, confidence, cost, latency" },
   ] },
   { criteria: ["C2", "C3"], keys: [
     { at: 0, shot: "ask0", box: "ask", caption: "Sponsor Analyst · real agent on our data API" },
@@ -84,7 +84,9 @@ const S = scenes as { start: number; end: number; title: string; file: string; t
 
 function boxOf(k: Key): Box {
   const sh = shots[k.shot] as { w: number; h: number; boxes: Record<string, Box | null> };
-  return sh.boxes[k.box] ?? { x: 0, y: 0, w: sh.w, h: VH };
+  const b = sh.boxes[k.box] ?? { x: 0, y: 0, w: sh.w, h: VH };
+  // tall blocks (long lists): frame their top part instead of shrinking the whole page
+  return b.h > 640 ? { ...b, h: 640 } : b;
 }
 
 function camera(b: Box, zoom?: number) {
@@ -318,7 +320,8 @@ export const Demo: React.FC = () => (
       const sc = S[i];
       const from = Math.round(sc.start * FPS);
       const dur = Math.round((sc.end - sc.start) * FPS);
-      const fade = (fr: number) => interpolate(fr, [0, 12, dur - 12, dur], [0, 1, 1, 0], clamp);
+      const last = i === PLAN.length - 1;
+      const fade = (fr: number) => interpolate(fr, [0, 12, dur - (last ? 40 : 12), dur], [0, 1, 1, 0], clamp);
       return (
         <Sequence key={i} from={from} durationInFrames={dur}>
           <SceneFade fade={fade}>
