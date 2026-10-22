@@ -256,3 +256,12 @@ def test_sponsors_csv_and_draft(tmp_path):
     out = tmp_path / "draft.csv"
     vi.write_draft({"Alpha Air": {"frames": 3, "surfaces": {"shirt"}}}, out)
     assert "b-alpha-air,Alpha Air,,3,shirt" in out.read_text()
+
+
+def test_wrong_key_stops_instead_of_looping():
+    class AuthenticationError(Exception):
+        pass
+
+    idf = ident(FakeOpenAI([AuthenticationError("401 Incorrect API key")]))
+    with pytest.raises(AuthenticationError):
+        idf.find(jpeg(), SPONSORS)

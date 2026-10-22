@@ -68,6 +68,8 @@ DEFAULT_MODEL = {"openai": "gpt-5-mini", "anthropic": "claude-opus-5-5"}
 READER_OF = {"openai": Reader.gpt, "anthropic": Reader.claude}
 SURFACES = [s.value for s in SurfaceType]
 SIDES = [s.value for s in Side]
+# SDK errors that no retry fixes (same class names in openai and anthropic).
+FATAL_ERRORS = {"AuthenticationError", "PermissionDeniedError", "NotFoundError"}
 # Assumed tokens of one call, only to reserve budget before the real usage is known.
 EXPECTED_TOKENS_IN, EXPECTED_TOKENS_OUT = 2500, 600
 
@@ -373,6 +375,8 @@ class Identifier:
             )
             data = r.data
         except Exception as e:  # noqa: BLE001  (reported, never guessed: caller marks the frame unmeasured)
+            if type(e).__name__ in FATAL_ERRORS:   # wrong key / no access / unknown model: stop, do not loop
+                raise
             call, data = Call(mode, self.model, 0, 0, 0.0, 0.0, error=f"{type(e).__name__}: {e}"[:300]), None
         self.calls.append(call)
         self._log(call, context)
