@@ -2,9 +2,10 @@
 
 Update this file before you stop working. Newest entry on top. Keep it short and factual.
 
-## Current state (updated 2026-10-22 ~13:00 by the orchestrator at 83% usage)
+## Current state (updated 2026-10-22 ~13:00 by the orchestrator at 83% usage; merges at ~13:55 by a cloud session)
 
-- Phase: **V1 slice + recognition.** Merged on main: T00, T01, T03, T04, T05, T10 (both parts), T11, T20 part 1.
+- Phase: **V1 slice + recognition.** Merged on main: T00, T01, T03, T04, T05, T06, T10 (both parts), T11,
+  T12 part 1 (#40), T14 part 1 (#42), T20 part 1.
   CI green. Pipeline works live on Aiven with the SYNTHETIC match: `python scripts/fake_stream.py` ->
   `python -m workers aggregate` -> `API_MOCK=0 uvicorn app.main:app` (or `API_MOCK=1` for mock data).
 - **Decisions:** vision provider = **OpenAI** (Anthropic credits may never arrive; `VISION_PROVIDER` switches).
@@ -12,12 +13,12 @@ Update this file before you stop working. Newest entry on top. Keep it short and
   say "independent reference labelling", never "club hand count". Submission form drives deliverables (T30 #34):
   one public Google Slide is all that is shown on stage; 3-min MP4 demo.
 - **In flight (agent worktrees, branches pushed when done; check `gh pr list`):**
-  - T06 `t06-ingest` (#7): ingest worker, tested on generated + real video.
   - T07 `t07-surfaces` (#8): OWLv2/GroundingDINO on Modal. **Blocked on GPU: Modal needs a payment method**
     (human adds card + claims $100); meanwhile CPU deploy, `SURFACES_GPU` env switches back to T4.
   - T08 `t08-vision-identify` (#9): OpenAI vision reader, `--discover` writes data/sponsors.draft.csv.
-  - T12 `t12-runtime-deploy` (#13): Aiven Runtime deploy on synthetic data; may need human console clicks (docs/DEPLOY.md).
-  - T14 `t14-router` (#15): router policy + worker with stub readers; defines the Reader protocol in vision/readers.py.
+  - **T12 todo:** the Runtime app still tracks branch `t12-runtime-deploy`; someone with `.env` must run
+    `python scripts/runtime_deploy.py --branch main` (the cloud session has no secrets).
+  - T07/T08 branches were never pushed: if their worktrees are lost, restart them from the issues.
   - Reference labeller (no git): writes data/gold/reference_intervals.csv, sponsors.reference.csv, LABELLING.md.
 - **Data (git-ignored):** data/videos/"5min .mp4" (club segment; note the space) and ucl.mp4 (top-league, internal
   tests only, never public). No sponsor list from the club yet.
