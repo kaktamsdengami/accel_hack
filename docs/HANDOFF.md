@@ -30,6 +30,21 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22: T08 vision identifier, provider-agnostic (Claude Opus 5.5, cloud session)
+- Done: `vision/identify.py` (OpenAI default / Anthropic via `VISION_PROVIDER`; modes read (crops -> router
+  `BrandReader` as `VisionReader`), find (whole frame -> Detections, no surface detector needed), discover
+  (-> data/sponsors.draft.csv)); `agents/prompts/identify.md`; `tests/test_identify.py` (fake SDK clients).
+  Schema enum allows only listed brand_ids or null; off-list answers dropped and counted. Cost per call from
+  token usage x PRICES (USD/1M tok) -> log line + data/costs/vision_calls.jsonl; unknown model price = refused.
+- Fastest path to a real number (no Kafka, no T07): `python -m vision.identify run --video "data/videos/5min .mp4"
+  --sponsors data/gold/sponsors.reference.csv --fps 1 --max-usd 1 --name gpt-5min`, then the printed
+  `python -m eval.harness ...` line writes the run record in eval/runs/.
+- Not verified: no live call was made (the cloud session has no keys and its proxy blocks api.openai.com). Prices
+  in PRICES are from public price lists, check them; bbox quality of GPT on thin LED strips is unknown.
+  Router wiring is T14 part 2: the router's primary vision slot is keyed `Reader.claude`, while the OpenAI reader
+  reports `Reader.gpt`.
+- Branch: t08-vision-identify.
+
 ### 2026-10-22: T06 live ingest worker (Claude Opus 5.5)
 - Done: `vision/preprocess.py` (HSV-histogram shot cuts, overlay mask = configured rects + static regions learned across shots, pHash dedup groups, `is_replay` hook = False), `workers/ingest.py` (`python -m workers ingest --video V --match-id M [--speed 1] [--source RECORDED] [--overlay x,y,w,h] [--dry-run]`), `scripts/make_test_video.py` (generated test match, no real footage). Publishes `Frame` to Kafka `frames`; representative frames: <=640 px JPEG in Postgres `evidence`, masked full-res JPEG in `data/frames/<match_id>/<frame_no>.jpg` (ignored by version control) for the readers. Registers the Match in Valkey like fake_stream.
 - Notes: frame_id = `<match>:<sample index>`, `t` = video clock of the decoded frame (25 fps source: 0.52 for the 0.5 s sample). Shots are only encoded in `shot_id` (no Shot topic). `is_representative` = first frame of a near-duplicate group. Only tested on generated video; thresholds (CUT_THRESHOLD 0.45, HASH_MAX_DIST 6, static std 9) need re-tuning on real footage. CI now installs `.[dev,vision]`; vision tests skip without cv2.
