@@ -30,6 +30,18 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22 ~15:35: demo match report expired, restored (Claude Opus 5.5, local session)
+- Symptom: dashboard showed SYNTHETIC / "Can't reach the backend (404 /matches/m-ucl-demo/report)".
+  Cause: `sp:m-ucl-demo:stats` has TTL 1 h (`STATS_TTL_S` in workers/aggregate.py); the replay was > 1 h old.
+- Fix: re-ran `python -m scripts.replay_run --run data/runs/ucl --sponsors data/gold/sponsors.reference.csv
+  --match-id m-ucl-demo --speed 8`, then PERSIST on every `sp:m-ucl-demo:*` key and `sp:match:m-ucl-demo` (no TTL now).
+  `/dashboard` without `?match=` opens m-ucl-demo (newest started_at). Title is now "Broadcast segment (RECORDED)".
+- Seen once: `/matches/m-ucl-demo/coverage` 503 on a cold ClickHouse connection -> dashboard stuck on "Loading match…"
+  until reload. After the deadline: retry in the API, and no TTL for RECORDED matches' stats.
+- Video: video/ (Remotion). Submitted = first render (EXPOSURE-demo.mp4 on the team PC). Local fixes after it
+  (decision-log camera, KPI row cut, ending hold) are in video/src; render with `--concurrency=10` (16 froze the PC)
+  and `--muted`, then mux data/voiceover via ffmpeg (Remotion's audio mux crashed once with 0xC0000142).
+
 ### 2026-10-22 ~13:55: state for the next session (cloud session, Claude Opus 5.5)
 - LIVE DEMO WORKS: public dashboard https://pixel-perfect-recreation-849.lovable.app/dashboard?match=m-ucl-demo
   (Lovable repo kaktamsdengami/screenshot-match; `?match=` pins the match and forces live mode). Data =

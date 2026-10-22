@@ -78,20 +78,20 @@ its citation chips; click a chip to jump to the timeline. Record only a live ans
 > intervals. The answer: FedEx, twenty seconds, on the far-side LED perimeter, between second thirty-two
 > and fifty-two. Every number comes from a measurement, never from the model's imagination.
 
-**2:02-2:25 | Data at the core** (architecture diagram)
+**2:02-2:21 | Data at the core** (architecture diagram)
 Screen: the dashboard's DATA LAYER strip and the landing page's BUILT ON AIVEN section. [C3]
 > Underneath is a live data layer on Aiven. Frames and agent decisions stream through Kafka.
 > ClickHouse turns them into per-second intervals and a coverage ledger. Valkey keeps the live
 > counters this dashboard reads, and PostgreSQL stores every evidence frame.
 
-**2:25-2:45 | Evidence** (back to Live match: KPI tiles + leaderboard)
+**2:21-2:41 | Evidence** (back to Live match: KPI tiles + leaderboard)
 Screen: Budget Guard card ($0.114 of $3.000, $0.118 per match-minute, projected 90 minutes) and an
 overlay with the run record numbers (the FRAMES ANALYSED tile counts only the last 50 decisions). [C4]
 > The measured result on this fifty-eight-second segment: a hundred and sixteen frames read, eighty-one
 > sponsor sightings, zero failed calls, zero brands outside the list. Eleven cents in total, about
 > twelve cents per match-minute, so a full match projects to around eleven dollars.
 
-**2:45-3:00 | Close** (the slide)
+**2:41-3:00 | Close** (the slide)
 Screen: the Google Slide. [C5]
 > EXPOSURE: every second of sponsor exposure, measured, priced and proven. Our first users are club
 > commercial teams preparing sponsor renewals. Next: logo memory, so every new match at the same
