@@ -27,6 +27,16 @@ Update this file before you stop working. Newest entry on top. Keep it short and
   removed with ClickHouse lightweight DELETE; the pub/sub payload is the raw MatchReport JSON (as the API expects).
 - Branch: t10-aggregate-worker. Contracts unchanged.
 
+### 2026-10-22: T11 API (Claude Opus 5.5)
+- Done: `app/api/{deps,routes,stream}.py`, routers included in `app/main.py`, `tests/test_api.py`. All CONTRACTS section 6
+  endpoints, validated by contracts models. `API_MOCK=1` serves `docs/api-mock.json` (simulated SSE, clock_t +1 s/tick).
+- Valkey inputs: report `sp:<id>:stats`, matches `sp:match:<id>` hash (fallback: match inside stats snapshots),
+  pub/sub `sp:live:<id>` (stats events), list `sp:<id>:decisions` polled 1 s (decision events). Keep-alive every 15 s.
+  ClickHouse: decisions, intervals, coverage. Postgres: `evidence`. `?max_events=N` closes the stream (curl/tests).
+- Stubs: chat (answer says analyst arrives in T17), replay (202, `started: false`). Clients live in `app/api/deps.py`; swap for `app/stores.py` (T10 part 2).
+- Not verified: alerts are not streamed (no `alert` events yet); brand pace/target come from the snapshot only.
+- Branch: t11-api.
+
 ### 2026-10-22: T10 part 1, pure aggregation logic (Claude Opus 5.5)
 - Done: `workers/aggregate_logic.py` (intervals, brand/surface stats, pace, LED timeline, coverage
   ledger/summary) + `tests/test_intervals.py`. No DB, no Valkey, db/ untouched.
