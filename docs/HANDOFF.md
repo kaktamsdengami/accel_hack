@@ -30,6 +30,22 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22 ~13:30: demo path on recorded UCL footage (cloud session, Claude Opus 5.5)
+- Human decision: the demo runs on data/videos/ucl.mp4 (good quality); video made in Remotion from the live
+  dashboard. Note: "5min .mp4" is ALSO top-league footage (UCL final 2023 sponsors), not a club clip.
+- Merged: T08 vision identifier (#43), run without labels (#45), parallel calls (#46), submission texts (#47),
+  BOM-safe sponsors (#48), replay of a recorded run into Kafka/Postgres/Valkey (#49), README/pitch draft (#44).
+- Run on the human's PC (keys and footage live there):
+  1. sponsor list: data/gold/sponsors.reference.csv (12 UCL partners, cleaned from `vision.identify discover`).
+  2. `python -m vision.identify run --video data/videos/ucl.mp4 --sponsors ... --fps 2 --max-usd 2 --name ucl
+     --match-id m-ucl --limit 600` -> data/runs/ucl/ (summary.json = the measured numbers + cost).
+  3. `python -m scripts.replay_run --run data/runs/ucl --sponsors ... --match-id m-ucl-demo --speed 4` -> the
+     deployed aggregator + dashboard show match m-ucl-demo (RECORDED). Frontend (screenshot-match) auto-switches
+     from SYNTHETIC to it within 10 s and shows the latest decision's evidence frame.
+- Gotchas: a stale Windows user env var OPENAI_API_KEY overrode .env (removed). No reference labels exist
+  (data/gold has only frames/ and sheets/), so there is no accuracy number: only measured seconds and cost.
+- Not done: T07 (Modal), T14 part 2 (real readers in the router), T15-T19 agents, Runtime redeploy from main.
+
 ### 2026-10-22: T08 vision identifier, provider-agnostic (Claude Opus 5.5, cloud session)
 - Done: `vision/identify.py` (OpenAI default / Anthropic via `VISION_PROVIDER`; modes read (crops -> router
   `BrandReader` as `VisionReader`), find (whole frame -> Detections, no surface detector needed), discover
