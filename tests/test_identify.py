@@ -219,7 +219,9 @@ def test_run_video_writes_harness_inputs(tmp_path):
     w.release()
     answers = [{"logos": [logo("b-alpha")]}] * 3 + [{"logos": []}]
     idf = ident(FakeOpenAI(answers))
-    s = vi.run_video(idf, str(video), SPONSORS, "m-t", fps=1, max_usd=1.0, out_dir=tmp_path / "out")
+    s = vi.run_video(
+        idf, str(video), SPONSORS, "m-t", fps=1, max_usd=1.0, out_dir=tmp_path / "out", workers=3
+    )
     assert s["frames"] == 4 and s["intervals"] >= 1 and s["cost_usd"] > 0
     assert s["brand_seconds"]["b-alpha"] == pytest.approx(3.0)
     pred = json.loads((tmp_path / "out" / "pred.json").read_text())
