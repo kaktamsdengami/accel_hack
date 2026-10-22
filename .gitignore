@@ -24,3 +24,5 @@ web/dist/
 Thumbs.db
 .vscode/
 .idea/
+*.egg-info/
+build/

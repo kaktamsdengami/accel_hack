@@ -67,7 +67,8 @@ def main():
         elif typ == "kafka":
             kc = [c for c in s["components"] if c["component"] == "kafka"]
             for c in kc:
-                print(f"  kafka component: auth={c.get('kafka_authentication_method')} port={c['port']} route={c.get('route')}")
+                auth, route = c.get('kafka_authentication_method'), c.get('route')
+                print(f"  kafka component: auth={auth} port={c['port']} route={route}")
             comp = next(c for c in kc if c.get("route") == "dynamic")
             updates["KAFKA_BOOTSTRAP"] = f"{comp['host']}:{comp['port']}"
             if write and admin.get("access_cert"):

@@ -1,0 +1,42 @@
+[project]
+name = "sponsorpulse"
+version = "0.1.0"
+description = "Live sponsor-exposure measurement for football broadcasts, with agents on Aiven"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+    "psycopg[binary]>=3.2",
+    "clickhouse-connect>=0.8",
+    "redis>=5.0",
+    "kafka-python>=2.0",
+]
+
+[project.optional-dependencies]
+vision = ["opencv-python-headless>=4.10", "numpy>=1.26", "pillow>=10.4"]
+llm = ["anthropic>=0.40", "openai>=1.50"]
+gpu = ["modal>=0.64"]
+dev = ["pytest>=8", "ruff>=0.6", "httpx>=0.27"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*", "workers*", "vision*", "agents*", "eval*", "db*"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E731", "UP042", "UP007"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: needs real Aiven/API credentials (run with -m live)"]
+addopts = "-m 'not live'"

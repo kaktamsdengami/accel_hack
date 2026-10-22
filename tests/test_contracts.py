@@ -19,7 +19,8 @@ def test_report_and_lists_validate():
 
 def test_sse_and_chat_validate():
     adapter = TypeAdapter(c.LiveUpdate)
-    events = [adapter.validate_python(e) for e in MOCK["SSE /matches/m-demo-1/stream (examples of each event)"]]
+    sse = MOCK["SSE /matches/m-demo-1/stream (examples of each event)"]
+    events = [adapter.validate_python(e) for e in sse]
     assert {e.event for e in events} == {"decision", "alert"}
     chat = MOCK["POST /matches/m-demo-1/chat"]
     c.ChatRequest.model_validate(chat["request"])
