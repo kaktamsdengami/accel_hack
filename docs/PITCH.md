@@ -77,7 +77,10 @@ cleared or generated footage)
 > Here the match clock runs and each sponsor's seconds grow in real time, split by surface. This
 > sponsor is behind its contracted pace, and the pace indicator shows it. On the right, the router's decisions:
 > which reader it chose, how confident it was, what it cost, and how much budget is left. This demo
-> match is synthetic, so the numbers on screen are not measurements.
+> match is synthetic, so the numbers on screen are not measurements. Click a sponsor and you get
+> its intervals per surface, the close-ups, and the evidence frame for each one. The coverage panel
+> shows how many seconds were measured, and for the rest, why not: no frame, low confidence, or a
+> group the budget guard chose not to pay for.
 
 **2:10-2:40 | Evidence** (results table, values only from eval/runs)
 > We measured against an independent reference labelling of a held-out window. Capture was
@@ -88,7 +91,7 @@ cleared or generated footage)
 **2:40-3:00 | Close** (slide)
 > Clubs get proof they can put in front of a sponsor, live, per surface, with frames. Next: the
 > coverage detective and the sponsor analyst on top of the same data. SponsorPulse: every second,
-> accounted for.
+> accounted for, and the seconds we could not account for, shown openly.
 
 Recording notes: if no run record exists by recording time, replace the 2:10-2:40 block with
 "Evaluation harness is ready; numbers are pending" and show `python -m eval.harness --help`
