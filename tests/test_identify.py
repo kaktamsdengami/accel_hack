@@ -221,6 +221,7 @@ def test_run_video_writes_harness_inputs(tmp_path):
     idf = ident(FakeOpenAI(answers))
     s = vi.run_video(idf, str(video), SPONSORS, "m-t", fps=1, max_usd=1.0, out_dir=tmp_path / "out")
     assert s["frames"] == 4 and s["intervals"] >= 1 and s["cost_usd"] > 0
+    assert s["brand_seconds"]["b-alpha"] == pytest.approx(3.0)
     pred = json.loads((tmp_path / "out" / "pred.json").read_text())
     assert pred[0]["brand_id"] == "b-alpha" and pred[0]["t_start"] == 0
     assert len(json.loads((tmp_path / "out" / "decisions.json").read_text())) == 4

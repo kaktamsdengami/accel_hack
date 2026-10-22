@@ -671,7 +671,7 @@ def run_video(
     """Whole-frame identification of a video -> out_dir/{detections,decisions,pred}.json + summary.json."""
     from app.config import settings
     from app.contracts import Shot
-    from workers.aggregate_logic import detections_to_intervals
+    from workers.aggregate_logic import detections_to_intervals, union_seconds
 
     s = settings()
     dets: list[Detection] = []
@@ -720,6 +720,11 @@ def run_video(
         "tokens_out": sum(c.tokens_out for c in ident.calls),
         "cost_usd": ident.spent_usd,
         "stopped": stopped,
+        # seconds a brand was visible on any surface (union), counted only from credited detections
+        "brand_seconds": {
+            b: union_seconds((i.t_start, i.t_end) for i in intervals if i.brand_id == b)
+            for b in sorted({i.brand_id for i in intervals})
+        },
     }
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
     return summary
