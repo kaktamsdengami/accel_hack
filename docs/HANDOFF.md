@@ -17,6 +17,18 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22: T14 part 1, router policy + worker with stub readers (Claude Opus 5.5)
+- Done: `vision/readers.py` (BrandReader / SurfaceDetector protocols, FrameGroup, Brand, ReaderResult, Stub*
+  readers and SYNTHETIC fixtures), `agents/router_policy.py` (escalation memory -> Claude -> GPT, budget guard,
+  per-stadium thresholds, `learn_thresholds` grid search for T15), `workers/router.py` (`python -m workers router`),
+  `db/postgres/003_router_thresholds.sql` (applied on Aiven), Valkey key `sp:<m>:router` in db/valkey_keys.md.
+- Checks: `ruff check .` clean; `python -m pytest -q` 118 passed; `-m live tests/test_router.py` 1 passed (20 frames ->
+  10 decisions + 40 detections, $0.03 cap: 2 stub Claude calls then 8 budget_cap groups; stub prices, not spend).
+- Not done (part 2): real readers (T07/T08/T09 implement the protocols, then add a `live` set in
+  `workers/router.build_readers`); sharpness/replay are not in the contracts yet (see PR); a budget-capped group is
+  unmeasured while boxes memory read confidently in it are still credited.
+- Branch: t14-router.
+
 ### 2026-10-22: T10 part 2, aggregation worker on Aiven (Claude Opus 5.5)
 - Done: `workers/aggregate.py` (`python -m workers aggregate`: Kafka detections/decisions/frames -> ClickHouse raw,
   intervals, coverage; Valkey snapshot `sp:<m>:stats`, pub/sub `sp:live:<m>`, decisions/alerts lists, match hash

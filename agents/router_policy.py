@@ -354,11 +354,11 @@ def route_group(group: FrameGroup, boxes: list[SurfaceBox], sponsors: list[Brand
         return done(Reader.memory, f"low_confidence: {why()} and no vision model is configured, so {n_esc} "
                                    f"unmeasured.", "low_confidence", causes)
     if cl.expected_cost_usd > budget.left() or not budget.reserve(cl.expected_cost_usd):
-        tried.append(Reader.claude)
+        # Claude is NOT called, so it is not in readers_tried and the group does not count as a Claude read.
         left = max(budget.left(), 0.0)
         money = ("the match budget is used up" if left < 0.0005
                  else f"only ${left:.3f} of the match budget is left")
-        return done(Reader.claude, f"budget_cap: {why()}, but {money}, so {n_esc} unmeasured instead of "
+        return done(Reader.memory, f"budget_cap: {why()}, but {money}, so {n_esc} unmeasured instead of "
                                    f"paying ${cl.expected_cost_usd:.3f} for Claude.", "budget_cap", causes)
     res = _call(cl, group, esc, sponsors, clock)
     budget.settle(cl.expected_cost_usd, res.cost_usd)

@@ -1,4 +1,6 @@
-"""Router policy and worker shell with stub readers (no network)."""
+"""Router policy and worker shell with stub readers (no network), plus one live end-to-end test."""
+import pytest
+
 from agents.router_policy import (
     LocalBudget,
     MemoryObservation,
@@ -8,7 +10,7 @@ from agents.router_policy import (
     load_thresholds,
     route_group,
 )
-from app.contracts import BBox, Frame, Reader, Side, SurfaceBox, SurfaceType
+from app.contracts import BBox, DecisionLog, Detection, Frame, Reader, Side, SurfaceBox, SurfaceType
 from vision.readers import (
     SYNTH_BRANDS,
     BoxRead,
@@ -135,6 +137,7 @@ def test_budget_cap_never_calls_claude_and_marks_unmeasured():
     d = out.decision
     assert readers[Reader.claude].calls == 0 and budget.spent_usd == 0
     assert d.confidence == 0 and d.reason.startswith("budget_cap") and out.unmeasured_reason == "budget_cap"
+    assert d.readers_tried == ["memory"] and d.chosen_reader == "memory"   # not counted as a Claude read
     assert out.boxes["m-t:0:led"].brand_id == "b-a"          # what memory read confidently is kept
     assert out.boxes["m-t:0:boardA"].brand_id is None        # never guessed
     # the aggregation turns this into unmeasured seconds with reason budget_cap
@@ -280,6 +283,7 @@ def test_worker_groups_frames_and_publishes():
     assert all(d.reason and d.budget_left_usd <= 3.0 for d in decs)
     traces = [r for t, r in ch.rows if t == "agent_traces"]
     assert traces and all(r["agent"] == "router" and r["model"].startswith("stub") for r in traces)
+    assert {r["step"] for r in traces} <= {"read:memory", "read:claude"}
 
 
 def test_detection_geometry_and_threshold():
@@ -291,3 +295,94 @@ def test_detection_geometry_and_threshold():
     assert led.area_pct == 2.2 and not led.below_threshold and 0 < led.center_dist < 1
     board = next(d for d in dets if d.surface_type == "static_board")
     assert board.area_pct == 0.9 and board.below_threshold
+
+
+# --- live: real Kafka, Valkey, ClickHouse, Postgres (python -m pytest -q -m live tests/test_router.py) ------
+
+@pytest.mark.live
+def test_live_router_frames_to_detections_and_decisions():
+    """Frames -> router worker (stub readers, $0.03 budget) -> detections + decisions on Kafka, traces in
+    ClickHouse, budget in Valkey. Memory is unsure about every LED, so Claude is called until the cap."""
+    import threading
+    import time
+    import uuid
+
+    from app import stores
+    from scripts import fake_stream
+    from workers import router as router_worker
+
+    run_id = uuid.uuid4().hex[:6]
+    match_id = f"m-router-test-{run_id}"
+    fake_stream.seed_services(fake_stream.synthetic_match(match_id, 60.0))   # SYNTHETIC brands + match hash
+    readers = {
+        Reader.memory: StubMemoryReader({LED: StubAnswer("b-synth-alpha", 0.4, 0.2, distance=0.6, refs=8),
+                                         BOARD: StubAnswer("b-synth-beta", 0.93, 0.4, 0.1, 8)}),
+        Reader.claude: StubClaudeReader({LED: StubAnswer("b-synth-alpha", 0.9)})}
+
+    out = stores.kafka_consumer("detections", "decisions", group_id=f"router-test-out-{run_id}",
+                                auto_offset_reset="latest")
+    deadline = time.monotonic() + 60
+    while not out.assignment() and time.monotonic() < deadline:
+        out.poll(timeout_ms=500)
+    assert out.assignment()
+    for tp in out.assignment():
+        out.position(tp)   # resolve "latest" now, before anything is produced
+
+    stop = threading.Event()
+    stats = {}
+    worker = threading.Thread(target=lambda: stats.update(router_worker.run(
+        stop=stop, group=f"router-test-{run_id}", match_filter={match_id}, readers=readers, budget_usd=0.03)),
+        daemon=True)
+    worker.start()
+    time.sleep(8)  # let the router join its consumer group
+    producer = stores.kafka_producer()
+    n_frames, n_groups = 20, 10
+    for n in range(n_frames):
+        producer.send("frames", key=match_id, value=Frame(
+            frame_id=f"{match_id}:{n}", match_id=match_id, shot_id=f"{match_id}:s0",
+            group_id=f"{match_id}:g{n // 2}", t=n / 2, width=1280, height=720, is_representative=n % 2 == 0))
+    producer.flush(timeout=30)
+
+    dets, decs = {}, {}
+    deadline = time.monotonic() + 90
+    while (len(decs) < n_groups or len(dets) < n_frames * 2) and time.monotonic() < deadline:
+        for tp, records in out.poll(timeout_ms=500).items():
+            for rec in records:
+                if rec.value.get("match_id") != match_id:
+                    continue
+                if tp.topic == "decisions":
+                    decs[rec.value["decision_id"]] = DecisionLog.model_validate(rec.value)
+                else:
+                    dets[rec.value["detection_id"]] = Detection.model_validate(rec.value)
+    stop.set()
+    worker.join(timeout=60)
+    out.close()
+
+    ordered = sorted(decs.values(), key=lambda d: d.t)
+    for d in ordered:
+        print(f"  t={d.t:4.1f} {d.chosen_reader:7} conf={d.confidence:.2f} ${d.cost_usd:.3f} "
+              f"left=${d.budget_left_usd:.3f} | {d.reason}")
+    print("  worker stats", stats)
+    assert len(ordered) == n_groups and len(dets) == n_frames * 2
+    paid = [d for d in ordered if d.cost_usd > 0]
+    capped = [d for d in ordered if d.reason.startswith("budget_cap")]
+    assert len(paid) == 2 and len(capped) == n_groups - 2 and all(d.confidence == 0 for d in capped)
+    assert round(sum(d.cost_usd for d in ordered), 6) == 0.024
+    cost = aggregate_logic.cost_summary(ordered, clock_t=n_frames / 2, budget_usd=0.03)   # stub prices
+    print(f"  segment {n_frames / 2:.0f}s: claude_call_share={cost.claude_call_share} "
+          f"usd_per_match_minute={cost.usd_per_match_minute} calls={cost.calls_by_reader}")
+    assert cost.claude_call_share == 0.2 and cost.usd_per_match_minute == pytest.approx(0.144)
+    led = [d for d in dets.values() if d.surface_type == "led_perimeter"]
+    assert sum(d.brand_id == "b-synth-alpha" for d in led) == 4            # 2 paid groups x 2 frames
+    assert all(d.brand_id == "b-synth-beta" for d in dets.values() if d.surface_type == "static_board")
+
+    budget = stores.valkey().hgetall(f"sp:{match_id}:router")
+    print("  valkey", budget)
+    assert float(budget["spent_usd"]) == pytest.approx(0.024) and int(budget["blocked"]) == n_groups - 2
+    assert int(budget["calls:claude"]) == 2 and int(budget["calls:memory"]) == n_groups
+    rows = stores.clickhouse().query(
+        "SELECT step, model, count(), sum(cost_usd), sum(tokens_in) FROM agent_traces "
+        "WHERE match_id = {m:String} AND agent = 'router' GROUP BY step, model ORDER BY step",
+        parameters={"m": match_id}).result_rows
+    print("  agent_traces", rows)
+    assert {r[0]: r[2] for r in rows} == {"read:claude": 2, "read:memory": n_groups}

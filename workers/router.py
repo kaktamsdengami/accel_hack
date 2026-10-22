@@ -97,7 +97,7 @@ class ValkeyBudget:
     def record(self, outcome: RouteOutcome) -> None:
         p = self.r.pipeline()
         for c in outcome.calls:
-            p.hincrby(self.key, f"calls:{c.reader}", 1)
+            p.hincrby(self.key, f"calls:{Reader(c.reader).value}", 1)
         if outcome.unmeasured_reason == "budget_cap":
             p.hincrby(self.key, "blocked", 1)
         p.execute()
@@ -152,7 +152,7 @@ def trace_row(group: FrameGroup, res: ReaderResult, n_sponsors: int) -> list:
                       "margin": round(b.margin, 3), "distance": b.distance, "refs": b.refs,
                       "unsure": b.unsure}
                      for b in res.boxes]}
-    return [group.match_id, "router", f"read:{res.reader}",
+    return [group.match_id, "router", f"read:{Reader(res.reader).value}",
             f"group {group.group_id} t={group.t:.1f}: {len(res.boxes)} boxes, {n_sponsors} sponsors",
             json.dumps(out)[:8000], res.model, int(res.tokens_in), int(res.tokens_out), float(res.cost_usd),
             float(res.latency_ms)]
@@ -330,7 +330,7 @@ def run(stop: threading.Event | None = None, group: str = GROUP, match_filter: s
     router = Router(readers=readers, budget_usd=budget_usd, match_filter=match_filter)
     consumer = stores.kafka_consumer("frames", group_id=group, auto_offset_reset=auto_offset_reset)
     log.info("router worker started: group=%s readers=%s budget=$%.2f/match", group,
-             ",".join(str(r) for r in router.readers), router.budget_usd)
+             ",".join(Reader(r).value for r in router.readers), router.budget_usd)
     try:
         while not stop.is_set():
             batch = consumer.poll(timeout_ms=250, max_records=200)
