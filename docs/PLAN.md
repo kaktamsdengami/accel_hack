@@ -107,7 +107,8 @@ model ~96%. So recognition is by **appearance**, not text.
 | Aiven PostgreSQL + pgvector | logo memory, stadiums, board maps, contracts, labels | T05, T09, T15, T18 |
 | Aiven Valkey | live counters and pacing | T10 |
 | Aiven Runtime | deploy api + workers + web from GitHub | T03, T12, T24 |
-| Anthropic API $100 | **product only**: vision identification, router, curator, detective, analyst; hard per-match budget | T08, T14–T17 |
+| OpenAI API $50 | **primary vision provider** (decision 2026-10-22: Anthropic credits uncertain) + agents if needed; hard per-match budget | T08, T14–T17 |
+| Anthropic API $100 (if credits arrive) | switchable vision provider (`VISION_PROVIDER`), independent second opinion | T08, T19 |
 | Modal $100 | GPU: surface detector, SigLIP embeddings, pitch keypoints; batch re-runs of matches; stretch fine-tune | T07, T09, T18, T25 |
 | OpenAI $50 | second-opinion vision on conflicts + independent check; **shared with Codex fallback, Codex has priority** | T19 |
 | Keenable $1000 | official logos and brand aliases to bootstrap memory; sponsorship price benchmarks for the pitch | T09, T27 |

@@ -2,20 +2,51 @@
 
 Update this file before you stop working. Newest entry on top. Keep it short and factual.
 
-## Current state
+## Current state (updated 2026-10-22 ~13:00 by the orchestrator at 83% usage)
 
-- Phase: **V0 setup.**
-- Done: T00, T01 (#32), T03 (#31), T04 (#33, CI green). Issues T01–T30 on GitHub (T30 = submission form).
-- In progress: none.
-- Next: T05 (schemas), T10 (intervals), T20 (eval harness) in parallel worktrees. T13 can start in Lovable from `docs/api-mock.json`.
-  Human: T02 (footage, sponsor list, hand count, permission).
-- Blocked: T06/T07/T08 need footage from T02. T08 also needs the Anthropic API key (credits not
-  arrived yet).
-- Local setup: `python -m venv .venv`, then `pip install "psycopg[binary]" clickhouse-connect redis
-  kafka-python python-dotenv pydantic pytest` (T04 will move this into pyproject). Venue Wi-Fi drops
-  PyPI downloads: install one package at a time with retries.
+- Phase: **V1 slice + recognition.** Merged on main: T00, T01, T03, T04, T05, T10 (both parts), T11, T20 part 1.
+  CI green. Pipeline works live on Aiven with the SYNTHETIC match: `python scripts/fake_stream.py` ->
+  `python -m workers aggregate` -> `API_MOCK=0 uvicorn app.main:app` (or `API_MOCK=1` for mock data).
+- **Decisions:** vision provider = **OpenAI** (Anthropic credits may never arrive; `VISION_PROVIDER` switches).
+  Reference ("gold") count = **independent labelling by Claude** at 1 fps (no club hand count exists) ->
+  say "independent reference labelling", never "club hand count". Submission form drives deliverables (T30 #34):
+  one public Google Slide is all that is shown on stage; 3-min MP4 demo.
+- **In flight (agent worktrees, branches pushed when done; check `gh pr list`):**
+  - T06 `t06-ingest` (#7): ingest worker, tested on generated + real video.
+  - T07 `t07-surfaces` (#8): OWLv2/GroundingDINO on Modal. **Blocked on GPU: Modal needs a payment method**
+    (human adds card + claims $100); meanwhile CPU deploy, `SURFACES_GPU` env switches back to T4.
+  - T08 `t08-vision-identify` (#9): OpenAI vision reader, `--discover` writes data/sponsors.draft.csv.
+  - T12 `t12-runtime-deploy` (#13): Aiven Runtime deploy on synthetic data; may need human console clicks (docs/DEPLOY.md).
+  - T14 `t14-router` (#15): router policy + worker with stub readers; defines the Reader protocol in vision/readers.py.
+  - Reference labeller (no git): writes data/gold/reference_intervals.csv, sponsors.reference.csv, LABELLING.md.
+- **Data (git-ignored):** data/videos/"5min .mp4" (club segment; note the space) and ucl.mp4 (top-league, internal
+  tests only, never public). No sponsor list from the club yet.
+- **Next after those land:** merge PRs (orchestrator may merge own PRs after green CI); wire real readers into the
+  router (T07+T08+T09 memory reader with Modal embeddings + Keenable logo bootstrap); T15 curator; T20 part 2 baselines
+  vs data/gold reference; T21 numbers; T17 analyst (OpenAI); T23 slide; T29 MP4; T30 submit.
+- Human: Modal billing; Lovable dashboard exists (mock) -> connect Lovable to GitHub and point VITE_API_BASE to the
+  T12 URL; confirm sponsor draft; optional 10-frame spot check of the reference labels.
+- Local setup: `.venv` with `pip install -e ".[dev,vision,llm,gpu]"`; Wi-Fi drops PyPI downloads, retry per package.
 
 ## Log
+
+### 2026-10-22: T06 live ingest worker (Claude Opus 5.5)
+- Done: `vision/preprocess.py` (HSV-histogram shot cuts, overlay mask = configured rects + static regions learned across shots, pHash dedup groups, `is_replay` hook = False), `workers/ingest.py` (`python -m workers ingest --video V --match-id M [--speed 1] [--source RECORDED] [--overlay x,y,w,h] [--dry-run]`), `scripts/make_test_video.py` (generated test match, no real footage). Publishes `Frame` to Kafka `frames`; representative frames: <=640 px JPEG in Postgres `evidence`, masked full-res JPEG in `data/frames/<match_id>/<frame_no>.jpg` (ignored by version control) for the readers. Registers the Match in Valkey like fake_stream.
+- Notes: frame_id = `<match>:<sample index>`, `t` = video clock of the decoded frame (25 fps source: 0.52 for the 0.5 s sample). Shots are only encoded in `shot_id` (no Shot topic). `is_representative` = first frame of a near-duplicate group. Only tested on generated video; thresholds (CUT_THRESHOLD 0.45, HASH_MAX_DIST 6, static std 9) need re-tuning on real footage. CI now installs `.[dev,vision]`; vision tests skip without cv2.
+- Checks: `ruff check .` ok, `python -m pytest -q` 107 passed; `pytest tests/test_preprocess.py -m live` passed (10 s clip into real Kafka/Postgres/Valkey).
+- Next: replay detector, real-footage tuning, reader consumers of `data/frames/`.
+
+### 2026-10-22: T14 part 1, router policy + worker with stub readers (Claude Opus 5.5)
+- Done: `vision/readers.py` (BrandReader / SurfaceDetector protocols, FrameGroup, Brand, ReaderResult, Stub*
+  readers and SYNTHETIC fixtures), `agents/router_policy.py` (escalation memory -> Claude -> GPT, budget guard,
+  per-stadium thresholds, `learn_thresholds` grid search for T15), `workers/router.py` (`python -m workers router`),
+  `db/postgres/003_router_thresholds.sql` (applied on Aiven), Valkey key `sp:<m>:router` in db/valkey_keys.md.
+- Checks: `ruff check .` clean; `python -m pytest -q` 118 passed; `-m live tests/test_router.py` 1 passed (20 frames ->
+  10 decisions + 40 detections, $0.03 cap: 2 stub Claude calls then 8 budget_cap groups; stub prices, not spend).
+- Not done (part 2): real readers (T07/T08/T09 implement the protocols, then add a `live` set in
+  `workers/router.build_readers`); sharpness/replay are not in the contracts yet (see PR); a budget-capped group is
+  unmeasured while boxes memory read confidently in it are still credited.
+- Branch: t14-router.
 
 ### 2026-10-22: T12 part 1, deployed on Aiven Runtime with synthetic data (Claude Opus 5.5)
 - Done: live at https://01a16333-2589-7299-babc-33f2830bf66a-8000.eur-1.aiven.app (Runtime app `sponsorpulse`,
