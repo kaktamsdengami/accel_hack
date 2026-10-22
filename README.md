@@ -82,7 +82,7 @@ curl -s $U/health
 curl -sN "$U/matches/m-synthetic/stream?max_events=2"
 ```
 
-Dashboard URL: `[[Lovable dashboard URL, to be added by the team]]`
+Dashboard URL: https://pixel-perfect-recreation-849.lovable.app/dashboard?match=m-ucl-demo
 
 ## Run locally
 

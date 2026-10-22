@@ -49,7 +49,7 @@ working with stub readers; real vision and memory readers in progress; curator, 
 next. Figures above appear only once a run record exists.
 
 Links: deployed API https://01a16333-2589-7299-babc-33f2830bf66a-8000.eur-1.aiven.app ·
-repo `[[GitHub URL]]` · dashboard `[[Lovable URL]]`
+repo https://github.com/kaktamsdengami/accel_hack- · dashboard https://pixel-perfect-recreation-849.lovable.app/dashboard?match=m-ucl-demo
 
 ---
 
