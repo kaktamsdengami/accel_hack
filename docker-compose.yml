@@ -1,0 +1,13 @@
+# Local run. Aiven services are remote; credentials come from .env, Kafka certs from data/certs.
+services:
+  api:
+    build: .
+    env_file: .env
+    ports: ["8000:8000"]
+    volumes: ["./data/certs:/app/data/certs:ro"]
+  # Workers are enabled by their tasks, e.g.:
+  # ingest:
+  #   build: .
+  #   env_file: .env
+  #   command: python -m workers ingest
+  #   volumes: ["./data:/app/data"]
