@@ -30,6 +30,12 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22: T06 live ingest worker (Claude Opus 5.5)
+- Done: `vision/preprocess.py` (HSV-histogram shot cuts, overlay mask = configured rects + static regions learned across shots, pHash dedup groups, `is_replay` hook = False), `workers/ingest.py` (`python -m workers ingest --video V --match-id M [--speed 1] [--source RECORDED] [--overlay x,y,w,h] [--dry-run]`), `scripts/make_test_video.py` (generated test match, no real footage). Publishes `Frame` to Kafka `frames`; representative frames: <=640 px JPEG in Postgres `evidence`, masked full-res JPEG in `data/frames/<match_id>/<frame_no>.jpg` (ignored by version control) for the readers. Registers the Match in Valkey like fake_stream.
+- Notes: frame_id = `<match>:<sample index>`, `t` = video clock of the decoded frame (25 fps source: 0.52 for the 0.5 s sample). Shots are only encoded in `shot_id` (no Shot topic). `is_representative` = first frame of a near-duplicate group. Only tested on generated video; thresholds (CUT_THRESHOLD 0.45, HASH_MAX_DIST 6, static std 9) need re-tuning on real footage. CI now installs `.[dev,vision]`; vision tests skip without cv2.
+- Checks: `ruff check .` ok, `python -m pytest -q` 107 passed; `pytest tests/test_preprocess.py -m live` passed (10 s clip into real Kafka/Postgres/Valkey).
+- Next: replay detector, real-footage tuning, reader consumers of `data/frames/`.
+
 ### 2026-10-22: T10 part 2, aggregation worker on Aiven (Claude Opus 5.5)
 - Done: `workers/aggregate.py` (`python -m workers aggregate`: Kafka detections/decisions/frames -> ClickHouse raw,
   intervals, coverage; Valkey snapshot `sp:<m>:stats`, pub/sub `sp:live:<m>`, decisions/alerts lists, match hash
