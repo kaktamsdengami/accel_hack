@@ -68,6 +68,8 @@ DEFAULT_MODEL = {"openai": "gpt-5-mini", "anthropic": "claude-opus-5-5"}
 READER_OF = {"openai": Reader.gpt, "anthropic": Reader.claude}
 SURFACES = [s.value for s in SurfaceType]
 SIDES = [s.value for s in Side]
+# SDK errors that no retry fixes (same class names in openai and anthropic).
+FATAL_ERRORS = {"AuthenticationError", "PermissionDeniedError", "NotFoundError"}
 # Assumed tokens of one call, only to reserve budget before the real usage is known.
 EXPECTED_TOKENS_IN, EXPECTED_TOKENS_OUT = 2500, 600
 
@@ -373,6 +375,8 @@ class Identifier:
             )
             data = r.data
         except Exception as e:  # noqa: BLE001  (reported, never guessed: caller marks the frame unmeasured)
+            if type(e).__name__ in FATAL_ERRORS:   # wrong key / no access / unknown model: stop, do not loop
+                raise
             call, data = Call(mode, self.model, 0, 0, 0.0, 0.0, error=f"{type(e).__name__}: {e}"[:300]), None
         self.calls.append(call)
         self._log(call, context)
@@ -671,7 +675,7 @@ def run_video(
     """Whole-frame identification of a video -> out_dir/{detections,decisions,pred}.json + summary.json."""
     from app.config import settings
     from app.contracts import Shot
-    from workers.aggregate_logic import detections_to_intervals
+    from workers.aggregate_logic import detections_to_intervals, union_seconds
 
     s = settings()
     dets: list[Detection] = []
@@ -720,6 +724,11 @@ def run_video(
         "tokens_out": sum(c.tokens_out for c in ident.calls),
         "cost_usd": ident.spent_usd,
         "stopped": stopped,
+        # seconds a brand was visible on any surface (union), counted only from credited detections
+        "brand_seconds": {
+            b: union_seconds((i.t_start, i.t_end) for i in intervals if i.brand_id == b)
+            for b in sorted({i.brand_id for i in intervals})
+        },
     }
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
     return summary
