@@ -1,6 +1,6 @@
-# SponsorPulse
+# EXPOSURE
 
-**Live sponsor-exposure measurement for football broadcasts.** SponsorPulse watches a match as it
+**Live sponsor-exposure measurement for football broadcasts.** EXPOSURE watches a match as it
 streams and measures, second by second, which sponsor is visible on which surface (LED perimeter,
 static boards, shirts, backdrop), with the frame as evidence. A club's commercial team gets a live
 dashboard and a per-sponsor report: seconds on screen, share of the match, close-ups, pacing against
