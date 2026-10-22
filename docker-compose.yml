@@ -1,8 +1,13 @@
-# Local run. Aiven services are remote; credentials come from .env, Kafka certs from data/certs.
+# Local run of the same image as Aiven Runtime (docs/DEPLOY.md). Aiven services are remote; credentials come
+# from .env, Kafka certs from data/certs. The api container also runs the aggregation worker (RUN_WORKER=1);
+# set DEMO_SYNTHETIC=1 in .env to loop the invented match of scripts/fake_stream.py.
+# For Runtime, select the Dockerfile as manifest, not this file (it declares no Aiven data services).
 services:
   api:
     build: .
     env_file: .env
+    environment:
+      AGG_GROUP: aggregate-local
     ports: ["8000:8000"]
     volumes: ["./data/certs:/app/data/certs:ro"]
   # Workers are enabled by their tasks, e.g.:
