@@ -14,6 +14,7 @@ Time is in match-clock seconds (see docs/CONTRACTS.md).
 | `sp:{match}:coverage` | hash | `measured_s`, `unmeasured_s`, `unmeasured:<reason>` -> seconds | aggregation -> API |
 | `sp:{match}:pace:{brand}` | hash | `target_seconds`, `projected_seconds`, `status` (ahead/on_track/behind/no_target) | analyst -> API |
 | `sp:{match}:budget` | hash | `limit_usd`, `spent_usd`, `left_usd`, `calls:<reader>` -> int | router -> API |
+| `sp:{match}:router` | hash | the router's own budget ledger: `limit_usd` (set once, `HSETNX`), `spent_usd` (reserved before each paid call with `HINCRBYFLOAT`, rolled back if it would pass the limit, then settled to the real cost), `calls:<reader>` -> int, `blocked` -> groups not read because of `budget_cap` | router -> router (all instances), API/debug |
 | `sp:{match}:alerts` | list | JSON `Alert`, newest first, `LTRIM` to 100 (aggregation pushes `under_pace`/`budget`; each alert id once) | aggregation, agents -> API |
 | `sp:{match}:decisions` | list | JSON `DecisionLog`, newest first, `LTRIM` to 200 (aggregation pushes every new decision from Kafka) | aggregation -> API |
 | `sp:{match}:stats` | string | latest `MatchReport` JSON (TTL 1 h) for SSE `stats` | aggregation -> API |
