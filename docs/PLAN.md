@@ -111,7 +111,7 @@ model ~96%. So recognition is by **appearance**, not text.
 | Lovable 300 credits | dashboard, sponsor report page, landing page | T13, T22 |
 | Supabase $25 | club/sponsor login through Lovable's built-in integration; data stays on Aiven | T28 |
 | n8n Pro | under-pace alert and post-match report workflow (demo sends only to our own address) | T26 |
-| ElevenLabs | voice-over for the demo/pitch video | T29 |
+| ElevenLabs (subscription, web app) | voice-over for the demo video, exported per scene by the human | T29 |
 | Remotion (code-built video) | motion graphics for the demo/pitch video, rendered from React | T29 |
 | GitHub | issues, milestones, PRs, Actions CI, Runtime source | all |
 
