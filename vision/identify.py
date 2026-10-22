@@ -687,8 +687,12 @@ def run_video(
     shots: dict[str, list[float]] = {}
     stopped = None
     exp = ident.expected_cost_usd()
+    frames_dir = out_dir / "frames"   # sampled JPEGs, for scripts/replay_run.py (evidence)
+    frames_dir.mkdir(parents=True, exist_ok=True)
 
     def flush(batch: list) -> None:
+        for k, _t, _s, jpeg in batch:
+            (frames_dir / f"{k}.jpg").write_bytes(jpeg)
         # one thread per frame of the batch; results are kept in frame order
         with ThreadPoolExecutor(max_workers=max(len(batch), 1)) as pool:
             res = list(pool.map(lambda b: ident.find(b[3], sponsors, context=f"{match_id}:{b[0]}"), batch))
