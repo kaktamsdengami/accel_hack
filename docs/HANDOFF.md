@@ -25,8 +25,13 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 - **Next after those land:** merge PRs (orchestrator may merge own PRs after green CI); wire real readers into the
   router (T07+T08+T09 memory reader with Modal embeddings + Keenable logo bootstrap); T15 curator; T20 part 2 baselines
   vs data/gold reference; T21 numbers; T17 analyst (OpenAI); T23 slide; T29 MP4; T30 submit.
-- Human: Modal billing; Lovable dashboard exists (mock) -> connect Lovable to GitHub and point VITE_API_BASE to the
-  T12 URL; confirm sponsor draft; optional 10-frame spot check of the reference labels.
+- **Dashboard (T13):** Lovable repo `kaktamsdengami/screenshot-match` (branch main, synced by Lovable; do not edit
+  it locally while Lovable works on it). Its `src/data/api-mock.json` is identical to `docs/api-mock.json`; every path
+  in its `src/api.ts` exists in our API. Blocker for live mode: `Dashboard.tsx` hardcodes `MATCH_ID = "m-demo-1"`,
+  the deployed API serves `m-synthetic` -> it must take the match from `GET /matches`. Live switch prompt for
+  Lovable is in the T13 issue/HANDOFF log below. The cloud session cannot reach `*.aiven.app` (proxy 403), so the
+  deployed URL was not re-checked from there.
+- Human: Modal billing; confirm sponsor draft; optional 10-frame spot check of the reference labels.
 - Local setup: `.venv` with `pip install -e ".[dev,vision,llm,gpu]"`; Wi-Fi drops PyPI downloads, retry per package.
 
 ## Log
