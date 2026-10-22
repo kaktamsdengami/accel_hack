@@ -17,6 +17,16 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 
 ## Log
 
+### 2026-10-22: T10 part 2, aggregation worker on Aiven (Claude Opus 5.5)
+- Done: `workers/aggregate.py` (`python -m workers aggregate`: Kafka detections/decisions/frames -> ClickHouse raw,
+  intervals, coverage; Valkey snapshot `sp:<m>:stats`, pub/sub `sp:live:<m>`, decisions/alerts lists, match hash
+  `sp:match:<m>`), `app/stores.py` (shared clients), `app/labels.py` (single `surface_label`, used by aggregate and
+  eval `pred_label`), `scripts/fake_stream.py` (SYNTHETIC `m-synthetic`, invented data), tests incl. one live e2e.
+- Choices: shots are not on Kafka, so they are derived from detections (is_replay always False until the router
+  publishes shots); coverage covers elapsed seconds only; pace/alerts need `duration_s`; stale absorbed intervals are
+  removed with ClickHouse lightweight DELETE; the pub/sub payload is the raw MatchReport JSON (as the API expects).
+- Branch: t10-aggregate-worker. Contracts unchanged.
+
 ### 2026-10-22: T10 part 1, pure aggregation logic (Claude Opus 5.5)
 - Done: `workers/aggregate_logic.py` (intervals, brand/surface stats, pace, LED timeline, coverage
   ledger/summary) + `tests/test_intervals.py`. No DB, no Valkey, db/ untouched.

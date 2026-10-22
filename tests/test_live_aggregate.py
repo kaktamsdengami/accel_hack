@@ -64,5 +64,5 @@ def test_synthetic_match_end_to_end():
     while (msg := pubsub.get_message(timeout=0.2)) is not None:
         if msg["type"] == "message":
             events.append(msg["data"])
-    assert any('"event":"stats"' in e for e in events)
+    assert any(MatchReport.model_validate_json(e).match.match_id == match_id for e in events)
     assert r.sismember("sp:matches", match_id)

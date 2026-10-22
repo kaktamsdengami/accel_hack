@@ -241,7 +241,7 @@ def test_alert_published_once():
         feed(agg, "detections", det(i, i * 0.5))
     agg.tick()
     assert agg.states["m"].match.source == "LIVE"
-    n_alerts = lambda: sum(1 for _, p in r.published() if '"event":"alert"' in p)  # noqa: E731
+    n_alerts = lambda: sum(1 for n, a, _ in r.calls if n == "lpush" and a[0] == "sp:m:alerts")  # noqa: E731
     assert n_alerts() == 1
     feed(agg, "detections", det(9, 2.0))
     agg.tick()

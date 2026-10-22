@@ -6,7 +6,7 @@ second, for every match that received data since the last tick, it recomputes in
 per-surface stats and the coverage ledger from ALL of that match's data so far (pure maths in
 workers/aggregate_logic.py), upserts ClickHouse `intervals` / `coverage` (ReplacingMergeTree: only changed
 rows are written, vanished intervals are deleted), writes the live keys of db/valkey_keys.md and
-publishes a LiveUpdate JSON on the Valkey channel `sp:live:<match_id>`.
+publishes the MatchReport JSON on the Valkey channel `sp:live:<match_id>`.
 
 Inputs outside Kafka: Match metadata from the Valkey hash `sp:match:<id>`; brand names and contract targets
 from Postgres `brands` / `contracts`. Recompute cost grows with the match (a full 90 min match is ~50k
@@ -25,16 +25,13 @@ from pydantic import ValidationError
 from app import stores
 from app.config import settings
 from app.contracts import (
-    AlertUpdate,
     DecisionLog,
-    DecisionUpdate,
     Detection,
     Frame,
     Interval,
     Match,
     MatchReport,
     Source,
-    StatsUpdate,
 )
 from workers.aggregate_logic import build_report, contract_targets
 
@@ -167,7 +164,6 @@ class Aggregator:
                 p.lpush(key, m.model_dump_json())
                 p.ltrim(key, 0, DECISIONS_KEEP - 1)
                 p.expire(key, MATCH_TTL_S)
-                p.publish(f"sp:live:{m.match_id}", DecisionUpdate(data=m).model_dump_json())
                 p.execute()
             except Exception as e:  # live fan-out is best effort; ClickHouse already has the row
                 log.warning("valkey decision push failed: %s", e)
@@ -279,9 +275,8 @@ class Aggregator:
         for a in new_alerts:
             st.seen_alerts.add(a.alert_id)
             p.lpush(f"sp:{m}:alerts", a.model_dump_json())
-            p.publish(f"sp:live:{m}", AlertUpdate(data=a).model_dump_json())
         p.ltrim(f"sp:{m}:alerts", 0, ALERTS_KEEP - 1)
-        p.publish(f"sp:live:{m}", StatsUpdate(data=report).model_dump_json())
+        p.publish(f"sp:live:{m}", report.model_dump_json())
         for suffix in ("clock", "brands", "coverage", "budget", "alerts"):
             p.expire(f"sp:{m}:{suffix}", MATCH_TTL_S)
         p.execute()
