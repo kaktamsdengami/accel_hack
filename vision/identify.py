@@ -92,7 +92,7 @@ def sponsor_lines(sponsors: Sequence[Brand]) -> str:
 
 def load_sponsors(path: str | pathlib.Path) -> list[Brand]:
     """CSV with header `brand_id,name[,aliases]`; aliases separated by `;`."""
-    with open(path, newline="", encoding="utf-8") as f:
+    with open(path, newline="", encoding="utf-8-sig") as f:  # BOM from PowerShell Export-Csv
         rows = list(csv.DictReader(f))
     out = []
     for r in rows:
