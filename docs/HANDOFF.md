@@ -40,7 +40,12 @@ Update this file before you stop working. Newest entry on top. Keep it short and
 - Prompt for Lovable (after the Runtime app is redeployed from main, or now, it serves the same code):
   "Set VITE_API_BASE to https://01a16333-2589-7299-babc-33f2830bf66a-8000.eur-1.aiven.app and turn mock mode off.
   Do not hardcode MATCH_ID: load GET /matches and use the first match (or a picker). If match.title contains
-  SYNTHETIC, show a SYNTHETIC badge instead of LIVE/RECORDED. Keep the MOCK DATA badge for mock mode."
+  SYNTHETIC, show a SYNTHETIC badge instead of LIVE/RECORDED. Keep the MOCK DATA badge for mock mode. Keep all labels in English. Replace the broadcast photo placeholder with
+  the evidence JPEG (GET /evidence/{frame_id}.jpg) of the frame being shown; when no frame_id is known, show a plain
+  'no frame yet' panel, not a stock photo."
+- Human decisions 2026-10-22: dashboard stays in English; broadcast panel shows pipeline evidence frames, not the club
+  clip (no public-use permission yet). Gap: the API has no "latest frame" endpoint and the SYNTHETIC match writes no
+  evidence rows, so the panel is empty on m-synthetic until a real ingest runs (or someone adds that endpoint).
 - The numbers on the current Lovable screen (38 % Claude share, $0.41 of $3.00, ...) are MOCK values from
   docs/api-mock.json: never quote them as results.
 
