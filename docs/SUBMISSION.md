@@ -3,7 +3,7 @@
 Copy-paste ready. `[[...]]` = fill from the run record in `eval/runs/` (or `data/runs/<name>/summary.json`
 for measured seconds and cost); never type a number that is not in a record.
 
-**Project name:** SponsorPulse
+**Project name:** EXPOSURE
 
 **One-line pitch:** Live, evidence-backed sponsor exposure for football broadcasts: seconds per sponsor and
 per surface, with the frame as proof and every unmeasured second accounted for.

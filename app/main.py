@@ -7,7 +7,7 @@ from app.api.stream import router as stream_router
 from app.config import settings
 from app.contracts import CONTRACTS_VERSION
 
-app = FastAPI(title="SponsorPulse", version="0.1.0")
+app = FastAPI(title="EXPOSURE", version="0.1.0")
 app.add_middleware(
     CORSMiddleware, allow_origins=settings().cors_origins, allow_methods=["*"], allow_headers=["*"]
 )

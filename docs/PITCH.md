@@ -9,7 +9,7 @@ sponsor names, no footage that is not cleared for public use.
 
 ## The slide (one public Google Slide, the only thing shown on stage)
 
-**Title:** SponsorPulse — AI agents that prove every second of sponsor exposure, live
+**Title:** EXPOSURE — AI agents that prove every second of sponsor exposure, live
 
 **Problem.** Clubs sell LED boards, shirts and backdrops for millions. At renewal the sponsor asks: "how
 many seconds was I really on TV, and where?" Today: a manual count after the match, or a guess.
@@ -42,7 +42,7 @@ repo https://github.com/kaktamsdengami/accel_hack-
 > sponsor asks one question: how many seconds was I really on TV? Nobody can answer it live.
 
 **0:15-0:40 | The product** (dashboard, sponsor leaderboard growing)
-> SponsorPulse watches the broadcast and measures, second by second, which sponsor is visible, on
+> EXPOSURE watches the broadcast and measures, second by second, which sponsor is visible, on
 > which surface, with the frame as proof. Here it is on a recorded Champions League segment.
 
 **0:40-1:20 | The agents** (zoom on "Agents at work", one card at a time)
@@ -67,7 +67,7 @@ repo https://github.com/kaktamsdengami/accel_hack-
 > twelve cents per match-minute.
 
 **2:45-3:00 | Close** (slide)
-> SponsorPulse: every second of sponsor exposure, measured live, with proof. Next: logo memory, so
+> EXPOSURE: every second of sponsor exposure, measured live, with proof. Next: logo memory, so
 > every new match at the same stadium gets cheaper.
 
 Recording note: show only what the dashboard shows; the Analyst answer must come from the live app.

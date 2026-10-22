@@ -4,7 +4,7 @@ Shared shapes for every worker, agent, the API and the Lovable dashboard. Code v
 `app/contracts.py` (Pydantic v2). Sample payloads: `docs/api-mock.json`. A change here needs a
 note in the issue and in `docs/HANDOFF.md`, and bumps `CONTRACTS_VERSION`.
 
-Product name: **SponsorPulse** (working name).
+Product name: **EXPOSURE** (decided 2026-10-22; internal DB/app ids stay `sponsorpulse`).
 
 ## 1. Conventions
 

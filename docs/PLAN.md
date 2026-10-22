@@ -1,12 +1,12 @@
 # Build plan: live sponsor-exposure agents (Accel "Data-Centric Agents")
 
-Working name: **SponsorPulse** (confirm in T01). GitHub issues are the source of truth for task
+Working name: **EXPOSURE** (confirm in T01). GitHub issues are the source of truth for task
 status; this file holds the design, the decisions and the task map.
 
 ## 1. Product in one paragraph
 
 A club sells boards, LED rotation, shirt and backdrop space. Sponsors ask "how many seconds was I
-really on TV, and where?". SponsorPulse watches a match **as it streams** and measures, per second,
+really on TV, and where?". EXPOSURE watches a match **as it streams** and measures, per second,
 which sponsor is visible on which **surface**, with frames as evidence. Measurement is a
 deterministic pipeline; **agents sit where decisions under uncertainty are needed**: a router that
 picks the cheapest reliable reader per shot within a budget, a memory curator that keeps each
